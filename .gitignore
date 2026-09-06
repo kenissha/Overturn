@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+web/dist/
+web/.vite/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Case data — never commit patient files
+data/
+!data/.gitkeep
+corpus/samples/*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
