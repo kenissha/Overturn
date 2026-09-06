@@ -183,6 +183,15 @@ _SPECS: tuple[FieldSpec, ...] = (
     _f("provider.name", FactKind.STRING, _D, "Treating provider or facility"),
     _f("provider.npi", FactKind.STRING, _D, "National Provider Identifier"),
     _f("provider.is_treating_physician", FactKind.BOOL, _D, "Author is the treating physician"),
+    # --- appeal ------------------------------------------------------------------
+    _f(
+        "appeal.filed_date",
+        FactKind.DATE,
+        _H,
+        "Date the advocate filed the appeal. Recorded by the human who filed it, because "
+        "Overturn never submits anything itself. Starts the plan's response clock.",
+        critical=True,
+    ),
     # --- deadlines (engine only) -------------------------------------------------
     _f(
         "deadline.internal_appeal_due",
