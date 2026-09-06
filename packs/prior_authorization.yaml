@@ -1,0 +1,101 @@
+# Denial category: prior authorization was not obtained, or the plan has no record of it.
+#
+# Distinct from medical necessity in what wins it. The clinical case is usually not in
+# dispute; what is in dispute is whether authorization was sought, granted, or excused.
+# That often turns on a phone call, which is why the decisive evidence here is frequently
+# something only the patient or the provider's office can produce.
+
+id: prior_authorization
+version: 1.0.0
+display_name: "Prior Authorization Not Obtained"
+
+match:
+  any_of:
+    - reason_code_in: ["CO-197", "CO-198", "CO-15"]
+    - phrase_matches:
+        - "prior authorization"
+        - "preauthorization"
+        - "pre-authorization"
+        - "precertification"
+        - "authorization was not obtained"
+        - "no authorization on file"
+  min_confidence: 0.75
+
+required_facts:
+  - denial.notice_date
+  - service.description
+  - service.date_of_service
+  - service.is_pre_service
+  - service.was_prior_auth_obtained
+  - plan.issuer
+
+required_evidence:
+  - id: authorization_record
+    label: "Authorization approval, reference number, or portal confirmation"
+    source: provider_records
+    blocking: true
+
+  - id: authorization_call_record
+    label: "Record of the authorization call: date, time, and representative name"
+    # Frequently the only evidence that authorization was verbally granted, and it exists
+    # only in someone's memory or notes until a person is asked for it.
+    source: patient_or_provider
+    human_only: true
+    blocking: false
+
+  - id: urgent_exception_evidence
+    label: "Evidence the service was urgent, if authorization was bypassed for that reason"
+    source: provider_records
+    blocking: false
+
+  - id: plan_authorization_policy
+    label: "The plan's own prior authorization requirements for this service"
+    source: public_reference
+    blocking: false
+
+deadline_regime: aca_internal
+
+argument_skeleton:
+  - id: opening
+    claim: >-
+      The claim for {service.description} rendered on {service.date_of_service} was denied
+      for lack of prior authorization. This letter appeals that determination.
+    requires_facts:
+      - service.description
+      - service.date_of_service
+
+  - id: authorization_was_obtained
+    claim: >-
+      Authorization was obtained before the service was rendered, as shown in the attached
+      record.
+    requires_evidence:
+      - authorization_record
+    condition:
+      fact: service.was_prior_auth_obtained
+      value_is: true
+
+  - id: verbal_authorization
+    claim: >-
+      Authorization was granted verbally. The attached record of that call sets out the
+      date, time and representative.
+    requires_evidence:
+      - authorization_call_record
+
+  - id: urgent_exception
+    claim: >-
+      The service was urgent, and the plan's own authorization requirements provide for
+      that circumstance.
+    requires_facts:
+      - service.was_urgent
+    requires_evidence:
+      - urgent_exception_evidence
+    condition:
+      fact: service.was_urgent
+      value_is: true
+
+  - id: policy_requirement_disputed
+    claim: >-
+      The plan's published authorization requirements do not list this service as
+      requiring prior authorization.
+    requires_evidence:
+      - plan_authorization_policy

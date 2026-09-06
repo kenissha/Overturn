@@ -1,0 +1,123 @@
+# Denial category: the plan says the service was not medically necessary.
+#
+# This is the most common denial category and the one where an appeal most often
+# succeeds, because the determination is a clinical judgment the treating physician
+# is better placed to make than a reviewer working from a claim form.
+#
+# Nothing in this file executes. Conditions are declarative: they name a fact and the
+# status or value it must have, and are checked by overturn/engine/packs.py.
+
+id: medical_necessity
+version: 1.0.0
+display_name: "Not Medically Necessary"
+
+# How the classifier recognises this category. Any one rule matching is enough; the
+# classifier weighs a reason code above a phrase, and refuses to choose at all when
+# another pack scores within its ambiguity margin.
+match:
+  any_of:
+    - reason_code_in: ["CO-50", "CO-55", "CO-167"]
+    - phrase_matches:
+        - "not medically necessary"
+        - "does not meet medical necessity"
+        - "medical necessity not established"
+        - "medically unnecessary"
+        - "not medically appropriate"
+  # A reading below this confidence is treated as absent. Classification branches the
+  # whole pipeline, so it does not build on a weak extraction.
+  min_confidence: 0.75
+
+# Facts an appeal against this category needs before a packet can be assembled.
+required_facts:
+  - denial.notice_date
+  - denial.cited_policy_section
+  - service.description
+  - service.date_of_service
+  - service.is_pre_service
+  - provider.is_treating_physician
+
+required_evidence:
+  - id: letter_of_medical_necessity
+    label: "Letter of medical necessity from the treating physician"
+    source: treating_physician
+    # No document already on file can substitute for this, and no agent can obtain it.
+    # Its absence raises escalation trigger 1.
+    human_only: true
+    blocking: true
+
+  - id: clinical_notes
+    label: "Clinical notes covering the date of service"
+    source: provider_records
+    blocking: true
+
+  - id: relevant_guideline
+    label: "Applicable clinical guideline or coverage policy"
+    source: public_reference
+    # Strengthens the appeal but does not hold it up.
+    blocking: false
+
+  - id: prior_treatment_history
+    label: "History of failed conservative treatment"
+    source: provider_records
+    blocking: false
+
+# The engine splits pre- and post-service itself from service.is_pre_service.
+deadline_regime: aca_internal
+
+# What the drafter is permitted to write, and what each paragraph may not be written
+# without. A step whose requirements are unmet is omitted and reported as a gap; it is
+# never softened into a claim the ledger cannot support.
+argument_skeleton:
+  - id: opening
+    claim: >-
+      The claim for {service.description} was denied on {denial.notice_date}. This
+      letter appeals that determination.
+    requires_facts:
+      - service.description
+      - denial.notice_date
+
+  - id: standard_challenge
+    claim: >-
+      The denial relies on {denial.cited_policy_section}. The determination applied that
+      standard without the clinical record described below.
+    requires_facts:
+      - denial.cited_policy_section
+
+  - id: necessity_argument
+    claim: >-
+      The treating physician has documented the medical necessity of this service in the
+      attached letter of medical necessity.
+    requires_evidence:
+      - letter_of_medical_necessity
+
+  - id: clinical_support
+    claim: >-
+      The attached clinical notes for {service.date_of_service} record the findings on
+      which that judgment rests.
+    requires_facts:
+      - service.date_of_service
+    requires_evidence:
+      - clinical_notes
+
+  - id: conservative_treatment
+    claim: >-
+      Conservative treatment was attempted and did not resolve the condition, as
+      documented in the attached treatment history.
+    requires_evidence:
+      - prior_treatment_history
+
+  - id: guideline_support
+    claim: >-
+      The applicable clinical guideline supports this service for this indication.
+    requires_evidence:
+      - relevant_guideline
+
+  # Only included when the ledger actually holds a contradiction between the policy
+  # document and the denial letter. Declarative, not an expression.
+  - id: policy_conflict
+    claim: >-
+      The plan document and the denial notice do not agree on whether this service is
+      covered. That contradiction is set out in the attached comparison.
+    condition:
+      fact: plan.covers_service
+      status_is: conflicted
