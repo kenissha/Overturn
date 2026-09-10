@@ -450,7 +450,9 @@ def _anomaly_escalations(
                 subject=subject,
                 question=(
                     f"A document on this case contains something unexpected. Review "
-                    f"{anomaly.doc_id}" + (f", page {anomaly.page}" if anomaly.page else "") + "."
+                    f"{_document_name(case, anomaly.doc_id)}"
+                    + (f", page {anomaly.page}" if anomaly.page else "")
+                    + "."
                 ),
                 why_it_matters=(
                     anomaly.explanation
@@ -501,6 +503,12 @@ _FIELD_NAMES = {
     "provider.is_treating_physician": "whether the treating physician wrote the letter",
 }
 """How the fields a person may be asked about read in a sentence."""
+
+
+def _document_name(case: Case, doc_id: str) -> str:
+    """The name the advocate knows a document by, not its internal id."""
+    document = case.document(doc_id)
+    return document.filename if document is not None else doc_id
 
 
 def _human(field_name: str) -> str:

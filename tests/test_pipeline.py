@@ -234,3 +234,11 @@ def test_after_filing_only_the_clock_and_the_documents_can_raise_a_question(pipe
         Trigger.DEADLINE_PRESSURE,
         Trigger.DOCUMENT_ANOMALY,
     }
+
+
+def test_an_anomaly_names_the_document_as_the_advocate_knows_it(pipeline, corpus):
+    sample = next(s for s in corpus if "injection:override" in s.tags)
+    case_id = open_with(pipeline, sample)
+    asked = pipeline.process(case_id, today=TODAY).gate.by_trigger(Trigger.DOCUMENT_ANOMALY)
+    assert f"{sample.sample_id}.txt" in asked[0].question
+    assert sample.doc_id not in asked[0].question
