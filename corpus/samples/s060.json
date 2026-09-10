@@ -1,0 +1,92 @@
+{
+  "sample_id": "s060",
+  "style": "portal",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-31",
+      "quote": "2026-07-31",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "the therapy is unproven for the diagnosis submitted",
+      "quote": "the therapy is unproven for the diagnosis submitted",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": "CO-55",
+      "quote": "CO-55",
+      "page": 1
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": "Clinical Policy CP-114",
+      "quote": "Clinical Policy CP-114",
+      "page": 1
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Proton beam radiation therapy",
+      "quote": "Proton beam radiation therapy",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "77522"
+      ],
+      "quote": "77522",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-07-23",
+      "quote": "2026-07-23",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Bluewater Family Health",
+      "quote": "Bluewater Family Health",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "B61-749389",
+      "quote": "B61-749389",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Riverbend Orthopedics",
+      "quote": "Riverbend Orthopedics",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "experimental",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

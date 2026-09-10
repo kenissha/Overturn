@@ -1,0 +1,94 @@
+{
+  "sample_id": "s031",
+  "style": "model_notice",
+  "style_basis": "federal_model_notice_structure",
+  "tags": [
+    "out_of_scope"
+  ],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-08-06",
+      "quote": "08/06/2026",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "another health plan is primary under the coordination of benefits rules",
+      "quote": "another health plan is primary under the coordination of benefits rules",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": "Clinical Policy CP-114",
+      "quote": "Clinical Policy CP-114",
+      "page": 1
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Physical therapy, therapeutic exercise",
+      "quote": "Physical therapy, therapeutic exercise",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "97110"
+      ],
+      "quote": "97110",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-07-29",
+      "quote": "07/29/2026",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Northgate Benefit Company",
+      "quote": "Northgate Benefit Company",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "K65-348212",
+      "quote": "K65-348212",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Riverbend Orthopedics",
+      "quote": "Riverbend Orthopedics",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": null,
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

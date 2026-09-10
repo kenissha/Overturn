@@ -1,0 +1,93 @@
+{
+  "sample_id": "s056",
+  "style": "portal",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-21",
+      "quote": "2026-07-21",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "the claim was submitted with an incorrect procedure code",
+      "quote": "the claim was submitted with an incorrect procedure code",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": "Article VII, Section 3",
+      "quote": "Article VII, Section 3",
+      "page": 1
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": "2026-09-19",
+      "quote": "2026-09-19",
+      "page": 1
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Therapeutic exercise and manual therapy",
+      "quote": "Therapeutic exercise and manual therapy",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "97110",
+        "97140"
+      ],
+      "quote": "97110, 97140",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-06-28",
+      "quote": "2026-06-28",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Bluewater Family Health",
+      "quote": "Bluewater Family Health",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "W59-265621",
+      "quote": "W59-265621",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Lakeside Imaging Center",
+      "quote": "Lakeside Imaging Center",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "coding_error",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

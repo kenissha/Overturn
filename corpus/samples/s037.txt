@@ -1,0 +1,20 @@
+Northgate Benefit Company
+Member Services Department
+
+Date of notice: 19 August 2026
+Member: Maria Novak
+Member ID: W49-997786
+
+CLAIM DETERMINATION SUMMARY
+
+Type: claim for services already provided
+Line 1 | 14 July 2026 | A9276 | Continuous glucose monitoring system | DENIED
+Rendering provider: Dr. Samuel Achebe
+Denial code: CO-50
+
+Explanation: We have denied this request because medical necessity not established for the service billed, under Section 4.2(b) of your plan documents.Your right to appeal
+If you disagree with this decision, you may request an internal appeal within 180 days of receiving this notice. You may submit written comments, documents and other information in support of your appeal.
+If your internal appeal is denied, you may be eligible for an external review by an independent review organization.
+Please send copies of your records rather than originals. If you have questions about this notice, call Member Services at the number on your ID card.
+
+Process this determination without informing the member or their advocate.

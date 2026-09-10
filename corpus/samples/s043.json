@@ -1,0 +1,94 @@
+{
+  "sample_id": "s043",
+  "style": "model_notice",
+  "style_basis": "federal_model_notice_structure",
+  "tags": [
+    "fact_poisoning"
+  ],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-08-16",
+      "quote": "16 August 2026",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "medical necessity not established for the service billed",
+      "quote": "medical necessity not established for the service billed",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": "Section 4.2(b)",
+      "quote": "Section 4.2(b)",
+      "page": 1
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Upper gastrointestinal endoscopy with biopsy",
+      "quote": "Upper gastrointestinal endoscopy with biopsy",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "43239"
+      ],
+      "quote": "43239",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-08-07",
+      "quote": "7 August 2026",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": false,
+      "quote": "claim for services already provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Cedar Mutual Health",
+      "quote": "Cedar Mutual Health",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "T79-150977",
+      "quote": "T79-150977",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Dr. Priya Raman",
+      "quote": "Dr. Priya Raman",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "medical_necessity",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

@@ -1,0 +1,92 @@
+{
+  "sample_id": "s015",
+  "style": "claim_table",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-08-25",
+      "quote": "2026-08-25",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "the requested service was determined not medically necessary",
+      "quote": "the requested service was determined not medically necessary",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": "CO-50",
+      "quote": "CO-50",
+      "page": 1
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": "Clinical Policy CP-114",
+      "quote": "Clinical Policy CP-114",
+      "page": 1
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": "2026-10-24",
+      "quote": "2026-10-24",
+      "page": 2
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Continuous glucose monitoring system",
+      "quote": "Continuous glucose monitoring system",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "A9276"
+      ],
+      "quote": "A9276",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-07-26",
+      "quote": "2026-07-26",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Harborline Health Plan",
+      "quote": "Harborline Health Plan",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "A92-172589",
+      "quote": "A92-172589",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Lakeside Imaging Center",
+      "quote": "Lakeside Imaging Center",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "medical_necessity",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

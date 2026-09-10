@@ -1,0 +1,92 @@
+{
+  "sample_id": "s052",
+  "style": "portal",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-18",
+      "quote": "07/18/2026",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "the rendering provider is out of network for your plan",
+      "quote": "the rendering provider is out of network for your plan",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": "CO-242",
+      "quote": "CO-242",
+      "page": 1
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": "Clinical Policy CP-114",
+      "quote": "Clinical Policy CP-114",
+      "page": 1
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Outpatient anesthesia services",
+      "quote": "Outpatient anesthesia services",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "01402"
+      ],
+      "quote": "01402",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-06-29",
+      "quote": "06/29/2026",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": false,
+      "quote": "claim for services already provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Bluewater Family Health",
+      "quote": "Bluewater Family Health",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "B30-393001",
+      "quote": "B30-393001",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Maple Street Physical Therapy",
+      "quote": "Maple Street Physical Therapy",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "out_of_network",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

@@ -1,0 +1,92 @@
+{
+  "sample_id": "s007",
+  "style": "narrative",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-31",
+      "quote": "07/31/2026",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "medical necessity not established for the service billed",
+      "quote": "medical necessity not established for the service billed",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": "2026-09-29",
+      "quote": "09/29/2026",
+      "page": 1
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "MRI of the lumbar spine without contrast",
+      "quote": "MRI of the lumbar spine without contrast",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "72148"
+      ],
+      "quote": "72148",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-07-11",
+      "quote": "07/11/2026",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Cedar Mutual Health",
+      "quote": "Cedar Mutual Health",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "R85-536087",
+      "quote": "R85-536087",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Dr. Lena Ortiz",
+      "quote": "Dr. Lena Ortiz",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "medical_necessity",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

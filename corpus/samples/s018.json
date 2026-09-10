@@ -1,0 +1,92 @@
+{
+  "sample_id": "s018",
+  "style": "claim_table",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-05",
+      "quote": "2026-07-05",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "there is no authorization on file for this service",
+      "quote": "there is no authorization on file for this service",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": "CO-15",
+      "quote": "CO-15",
+      "page": 1
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Outpatient knee arthroscopy",
+      "quote": "Outpatient knee arthroscopy",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "29881"
+      ],
+      "quote": "29881",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-06-21",
+      "quote": "2026-06-21",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": false,
+      "quote": "claim for services already provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Harborline Health Plan",
+      "quote": "Harborline Health Plan",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "W12-173345",
+      "quote": "W12-173345",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Maple Street Physical Therapy",
+      "quote": "Maple Street Physical Therapy",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "prior_authorization",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

@@ -39,7 +39,8 @@ The whole capability set of the zone is one class. We pin it:
 def test_the_untrusted_writer_can_do_nothing_but_record_facts():
     """If a method is ever added here, this test fails."""
     public = {
-        name for name in dir(LedgerWriter)
+        name
+        for name in dir(LedgerWriter)
         if not name.startswith("_") and callable(getattr(LedgerWriter, name))
     }
     assert public == {"write_fact", "write_fact_by_quote", "mark_missing"}

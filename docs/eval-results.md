@@ -70,7 +70,10 @@ federal model notice of adverse benefit determination, and narrative, claim-tabl
 portal-printout forms. Dates are printed in four formats. Reason codes, policy sections
 and stated deadlines are each present in some letters and absent in others, so there is
 something to abstain on: across the corpus the answer key contains 626 established values
-and 94 fields the letters deliberately do not establish.
+and 154 fields the letters deliberately do not establish. Sixty of those are
+`plan.covers_service`: no denial letter in the corpus states what the plan covers, so the
+correct reading of a denial letter is "not stated here" — the plan document is where
+coverage is read from.
 
 ### What is synthetic, and what that means
 

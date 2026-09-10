@@ -53,6 +53,7 @@ def write_fact(field: str, value: str, page: int, quote: str, confidence: float)
     """Record one fact the document states, with the exact text that states it."""
     return str(writer.write_fact_by_quote(field, value, doc_id, page, quote, confidence))
 
+
 @tool(name="mark_missing")
 def mark_missing(field: str, reason: str) -> str:
     """Record that the document does not state this field."""

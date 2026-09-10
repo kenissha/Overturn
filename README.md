@@ -281,20 +281,28 @@ are in [docs/eval-results.md](docs/eval-results.md).
 
 ```
 overturn/
-  ledger/      the fact ledger: taxonomy, invariants, storage, write audit
-  tools/       the untrusted zone's only capabilities, and quote/value handling
-  agents/      the extraction agent (Strands Agents SDK)
-  models/      provider-agnostic model selection by role
-  engine/      deadlines, rule packs, classification, evidence, anomalies,
-               escalation gate, argument planning — no model anywhere
-  pipeline.py  ingest → extract → evaluate → a person answers
-  scheduler/   the background tick
-  api/         FastAPI, thin: hands actions to the pipeline, returns views
-  eval/        corpus and harness
-packs/         denial categories as data
-web/           the interface (React, TypeScript)
-tests/         ledger, engine, packs, agents, api, eval, red team
+  ledger/       the fact ledger: taxonomy, invariants, storage, write audit
+  tools/        the untrusted zone's only capabilities: quote location, value coercion,
+                and recording conflicts between documents
+  agents/       the extraction agent (Strands Agents SDK), local or on AgentCore
+  models/       provider-agnostic model selection by role
+  engine/       deadlines, rule packs, classification, evidence, anomalies,
+                escalation gate, argument planning — no model anywhere
+  pipeline.py   ingest → extract → evaluate → a person answers → filed → decided
+  scheduler/    the background tick
+  retention.py  finished files are purged after 30 days
+  telemetry.py  one span per pipeline step, identifiers only (OVERTURN_OTEL)
+  api/          FastAPI, thin: hands actions to the pipeline, returns views
+  eval/         corpus, harness, red-team runner, corpus export
+corpus/         the evaluation letters as uploadable files, with answer keys
+packs/          denial categories as data
+web/            the interface (React, TypeScript)
+deploy/         the untrusted zone as an AgentCore runtime
+tests/          ledger, engine, packs, agents, api, eval, red team
 ```
+
+Where this build departs from the original plan, and why, is in
+[docs/decisions.md](docs/decisions.md).
 
 ---
 
@@ -303,6 +311,11 @@ tests/         ledger, engine, packs, agents, api, eval, red team
 Built and tested: the ledger with verified citations; the deterministic engine; five rule
 packs; the extraction agent and its model layer; the pipeline, background tick, API and
 interface; the evaluation corpus and calibrated harness; the structural red-team suite.
+Plan documents are read for what they cover, and when two documents disagree the ledger
+keeps both readings as a conflict for a person to decide — a document never overwrites
+another silently, and never overwrites what a person confirmed. Tracing is opt-in
+(`OVERTURN_OTEL=console` or `otlp`) and spans carry identifiers and counts, never a value
+from a document.
 
 Prepared but not yet deployed: the extraction agent as an Amazon Bedrock AgentCore
 runtime ([deploy/agentcore/](deploy/agentcore/README.md)). Only the untrusted zone runs

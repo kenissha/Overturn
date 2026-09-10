@@ -1,0 +1,92 @@
+{
+  "sample_id": "s053",
+  "style": "model_notice",
+  "style_basis": "federal_model_notice_structure",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-04",
+      "quote": "4 July 2026",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "the claim was submitted with an incorrect procedure code",
+      "quote": "the claim was submitted with an incorrect procedure code",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Office visit, established patient",
+      "quote": "Office visit, established patient",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "99214"
+      ],
+      "quote": "99214",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-05-31",
+      "quote": "31 May 2026",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Cedar Mutual Health",
+      "quote": "Cedar Mutual Health",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "H25-443259",
+      "quote": "H25-443259",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Maple Street Physical Therapy",
+      "quote": "Maple Street Physical Therapy",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "coding_error",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}

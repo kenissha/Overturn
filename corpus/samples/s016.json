@@ -1,0 +1,92 @@
+{
+  "sample_id": "s016",
+  "style": "claim_table",
+  "style_basis": "synthetic",
+  "tags": [],
+  "gold": {
+    "denial.notice_date": {
+      "field": "denial.notice_date",
+      "value": "2026-07-20",
+      "quote": "2026-07-20",
+      "page": 1
+    },
+    "denial.reason_text": {
+      "field": "denial.reason_text",
+      "value": "the service required precertification, which was not requested",
+      "quote": "the service required precertification, which was not requested",
+      "page": 1
+    },
+    "denial.reason_code": {
+      "field": "denial.reason_code",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.cited_policy_section": {
+      "field": "denial.cited_policy_section",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "denial.stated_appeal_deadline": {
+      "field": "denial.stated_appeal_deadline",
+      "value": null,
+      "quote": null,
+      "page": null
+    },
+    "service.description": {
+      "field": "service.description",
+      "value": "Outpatient cardiac stress test",
+      "quote": "Outpatient cardiac stress test",
+      "page": 1
+    },
+    "service.cpt_codes": {
+      "field": "service.cpt_codes",
+      "value": [
+        "93015"
+      ],
+      "quote": "93015",
+      "page": 1
+    },
+    "service.date_of_service": {
+      "field": "service.date_of_service",
+      "value": "2026-06-21",
+      "quote": "2026-06-21",
+      "page": 1
+    },
+    "service.is_pre_service": {
+      "field": "service.is_pre_service",
+      "value": true,
+      "quote": "request for approval before the service is provided",
+      "page": 1
+    },
+    "plan.issuer": {
+      "field": "plan.issuer",
+      "value": "Harborline Health Plan",
+      "quote": "Harborline Health Plan",
+      "page": 1
+    },
+    "patient.member_id": {
+      "field": "patient.member_id",
+      "value": "M14-820092",
+      "quote": "M14-820092",
+      "page": 1
+    },
+    "provider.name": {
+      "field": "provider.name",
+      "value": "Riverbend Orthopedics",
+      "quote": "Riverbend Orthopedics",
+      "page": 1
+    },
+    "plan.covers_service": {
+      "field": "plan.covers_service",
+      "value": null,
+      "quote": null,
+      "page": null
+    }
+  },
+  "expected_pack": "prior_authorization",
+  "expected_ambiguous": false,
+  "expected_anomalies": [],
+  "notes": ""
+}
