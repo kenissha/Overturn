@@ -75,7 +75,7 @@ def test_a_deadline_crossing_overnight_is_a_new_question(pipeline, corpus):
 
     due = pipeline.evaluate(case_id, today=TODAY).deadlines.get("deadline.internal_appeal_due").due
     later = scheduler.tick(today=due - timedelta(days=5))
-    assert any("day(s) away" in question for _, question in later.new_questions)
+    assert any("days away" in question for _, question in later.new_questions)
 
 
 def test_what_has_been_surfaced_survives_a_restart(pipeline, corpus):

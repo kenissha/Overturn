@@ -346,7 +346,7 @@ def test_deadlines_are_named_plainly(registry, pack):
     asked = gate(ready_case(pack), registry, pack, today=date(2027, 1, 24)).by_trigger(
         Trigger.DEADLINE_PRESSURE
     )
-    assert asked[0].question.startswith("The internal appeal deadline is 4 day(s) away")
+    assert asked[0].question.startswith("The internal appeal deadline is 4 days away")
 
 
 def test_the_plans_response_clock_asks_about_the_plan_not_the_filing(registry, pack):

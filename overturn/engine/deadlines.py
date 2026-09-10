@@ -301,8 +301,9 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
                 due=stated,
                 basis=Basis.STATED_IN_LETTER,
                 regime=regime,
-                anchor_field="denial.stated_appeal_deadline",
-                anchor_date=stated,
+                # The window opened at receipt; only its end is printed in the letter.
+                anchor_field=anchor.field,
+                anchor_date=anchor.on,
                 anchor_is_estimated=False,
                 rule="deadline printed in the notice; a stated date overrides the "
                 "statutory default",

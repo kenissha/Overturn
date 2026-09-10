@@ -289,3 +289,18 @@ def test_recording_the_filing_meets_the_filing_window():
     assert filing.met_on == date(2027, 1, 20)
     assert filing.pressure(date(2027, 1, 27)) is Pressure.NONE
     assert result.get("deadline.plan_response_due").met_on is None
+
+
+def test_a_stated_deadline_still_records_when_its_window_opened():
+    """A printed end date does not erase the start: the strip draws the whole window."""
+    result = compute_deadlines(
+        case_with(
+            denial__received_date="2026-08-01",
+            denial__stated_appeal_deadline="2026-10-15",
+            service__is_pre_service=False,
+        )
+    )
+    due = result.get("deadline.internal_appeal_due")
+    assert due.basis is Basis.STATED_IN_LETTER
+    assert due.anchor_field == "denial.received_date"
+    assert due.anchor_date == date(2026, 8, 1)

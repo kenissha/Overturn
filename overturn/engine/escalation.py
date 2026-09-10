@@ -196,7 +196,7 @@ def _deadline_escalations(
         elif pressure is Pressure.EXPIRED:
             question = (
                 f"{_deadline_name(deadline.field).capitalize()} passed "
-                f"{abs(remaining)} day(s) ago. How should this case proceed?"
+                f"{_days(abs(remaining))} ago. How should this case proceed?"
             )
             why = (
                 "Filing after the window usually ends the internal route, but a stated "
@@ -205,7 +205,7 @@ def _deadline_escalations(
             options = ("File anyway", "Move to external review", "Close the case")
         else:
             question = (
-                f"{_deadline_name(deadline.field).capitalize()} is {remaining} day(s) "
+                f"{_deadline_name(deadline.field).capitalize()} is {_days(remaining)} "
                 "away. Is this case on track to be filed?"
             )
             why = (
@@ -477,10 +477,14 @@ def _deadline_name(field_name: str) -> str:
     return _DEADLINE_NAMES.get(field_name, _human(field_name))
 
 
+def _days(n: int) -> str:
+    return "1 day" if n == 1 else f"{n} days"
+
+
 def _when(days: int) -> str:
     if days > 0:
-        return f"in {days} day(s)"
-    return "today" if days == 0 else f"{-days} day(s) ago"
+        return f"in {_days(days)}"
+    return "today" if days == 0 else f"{_days(-days)} ago"
 
 
 _FIELD_NAMES = {
