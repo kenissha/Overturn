@@ -70,6 +70,7 @@ extraction agent uses, but not by a model. The trace view names that writer
 ```bash
 OVERTURN_EXTRACTOR=model uvicorn --factory overturn.api.app:app_from_env    # Amazon Bedrock
 OVERTURN_MODEL_PROVIDER=anthropic OVERTURN_EXTRACTOR=model uvicorn ...     # Anthropic API
+OVERTURN_EXTRACTOR=agentcore OVERTURN_AGENTCORE_ARN=arn:... uvicorn ...    # on AgentCore
 python -m overturn.eval --extractor model --limit 5                       # score it
 python -m overturn.scheduler --interval 900                               # the background tick
 ```
@@ -283,8 +284,13 @@ Built and tested: the ledger with verified citations; the deterministic engine; 
 packs; the extraction agent and its model layer; the pipeline, background tick, API and
 interface; the evaluation corpus and calibrated harness; the structural red-team suite.
 
-Not yet: model-backed evaluation numbers (awaiting model access), deployment to Amazon
-Bedrock AgentCore, and OCR for scanned letters. The evaluation corpus covers the first two
+Prepared but not yet deployed: the extraction agent as an Amazon Bedrock AgentCore
+runtime ([deploy/agentcore/](deploy/agentcore/README.md)). Only the untrusted zone runs
+there, and every fact it proposes is verified again by the local ledger before it is
+recorded; the runtime and that check are tested offline.
+
+Not yet: model-backed evaluation numbers (awaiting model access), and OCR for scanned
+letters. The evaluation corpus covers the first two
 rule packs; the other three are exercised by classification and pack tests, not yet by
 corpus letters.
 

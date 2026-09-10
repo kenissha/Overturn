@@ -88,6 +88,27 @@ without a model, in `tests/redteam/test_structural_defences.py` unless noted.
 
 ---
 
+## Running the untrusted zone remotely
+
+The extraction agent can run on Amazon Bedrock AgentCore (`overturn/agents/runtime.py`,
+`deploy/agentcore/`). Moving it across a network does not move the boundary:
+
+- The runtime returns **proposals** — each fact with its page and quote, and each field it
+  marked missing — never ledger writes.
+- The caller replays every proposal through its own ledger writer
+  (`overturn/agents/remote.py`), so each quote is located again on the local copy of the
+  document, and each field is checked against the local taxonomy and write origins.
+- The runtime reports a hash of the text it read. If it does not match the local copy,
+  nothing is replayed.
+- Only fields that were asked for are replayed.
+
+A compromised or misconfigured runtime can propose anything; it can record nothing the
+local ledger would not have accepted from a local agent. `tests/agents/test_runtime.py`
+forges a runtime response with an invented citation, a deadline and an unknown field, and
+checks that all three are refused and audited locally.
+
+---
+
 ## What this does not stop
 
 **Fact poisoning.** Privilege separation stops an injected instruction from *acting*. It

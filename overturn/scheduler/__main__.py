@@ -39,13 +39,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--once", action="store_true", help="tick once and exit")
     args = parser.parse_args(argv)
 
-    extractor = None
-    if os.environ.get("OVERTURN_EXTRACTOR") == "model":
-        from overturn.agents.extraction import StrandsExtractor
-        from overturn.models.factory import build_model
+    from overturn.agents.factory import extractor_from_env
 
-        extractor = StrandsExtractor(lambda: build_model("extraction"))
-
+    extractor = extractor_from_env()
     pipeline = Pipeline(
         CaseStore(args.data), PackRegistry.from_directory(ROOT / "packs"), extractor
     )
