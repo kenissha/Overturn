@@ -1,0 +1,112 @@
+# Denial category: the provider is outside the plan's network.
+#
+# What wins these is rarely the clinical case. It is one of three facts: the plan's own
+# directory listed the provider as in network, the service was an emergency, or no
+# in-network provider could reasonably be reached. The first is public record; the second
+# is a judgment only a person can make; the third usually only the patient can document.
+#
+# Nothing in this file executes. Conditions are declarative and are checked by
+# overturn/engine/packs.py.
+
+id: out_of_network
+version: 1.0.0
+display_name: "Provider Out of Network"
+
+match:
+  any_of:
+    # X12 CARC 242: services not provided by network/primary care providers.
+    - reason_code_in: ["CO-242"]
+    - phrase_matches:
+        - "out-of-network"
+        - "out of network"
+        - "not a participating provider"
+        - "non-participating provider"
+        - "provider is not in network"
+        - "not in the plan's network"
+  min_confidence: 0.75
+
+required_facts:
+  - denial.notice_date
+  - service.description
+  - service.date_of_service
+  - provider.name
+  # Whether the service was an emergency changes which rules apply. No document settles it,
+  # so every file in this category asks.
+  - service.was_urgent
+
+required_evidence:
+  - id: itemized_bill
+    label: "Itemized bill or explanation of benefits for the service"
+    source: provider_records
+    blocking: true
+
+  - id: network_directory_record
+    label: "The plan's provider directory listing the provider as in network on the date of service"
+    source: public_reference
+    blocking: false
+
+  - id: emergency_record
+    label: "Emergency or urgent care record for the date of service"
+    source: provider_records
+    blocking: false
+
+  - id: network_gap_evidence
+    label: "Evidence that no in-network provider was available within a reasonable time or distance"
+    source: patient_or_provider
+    human_only: true
+    blocking: false
+
+  - id: referral_record
+    label: "Referral or authorization to see this provider"
+    source: provider_records
+    blocking: false
+
+deadline_regime: aca_internal
+
+argument_skeleton:
+  - id: opening
+    claim: >-
+      The claim for {service.description} provided by {provider.name} on
+      {service.date_of_service} was denied as out of network on {denial.notice_date}. This
+      letter appeals that determination.
+    requires_facts:
+      - service.description
+      - provider.name
+      - service.date_of_service
+      - denial.notice_date
+
+  - id: emergency_services
+    claim: >-
+      The service was an emergency. Federal rules for emergency services require coverage
+      without regard to whether the provider participates in the plan's network. The
+      emergency record for {service.date_of_service} is attached.
+    requires_facts:
+      - service.was_urgent
+      - service.date_of_service
+    requires_evidence:
+      - emergency_record
+    condition:
+      fact: service.was_urgent
+      value_is: true
+
+  - id: directory_listing
+    claim: >-
+      On the date of service the plan's own provider directory listed {provider.name} as a
+      participating provider, as shown in the attached record.
+    requires_facts:
+      - provider.name
+    requires_evidence:
+      - network_directory_record
+
+  - id: network_inadequacy
+    claim: >-
+      No in-network provider was available to deliver this service within a reasonable time
+      or distance, as set out in the attached.
+    requires_evidence:
+      - network_gap_evidence
+
+  - id: referral
+    claim: >-
+      The patient was referred to this provider, as shown in the attached referral.
+    requires_evidence:
+      - referral_record

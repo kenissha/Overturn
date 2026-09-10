@@ -1,0 +1,91 @@
+# Denial category: the claim was denied for a coding or billing error.
+#
+# The service itself is not in dispute; the paperwork is. These are often the fastest
+# files to close, and the evidence that closes them lives in the provider's billing office
+# rather than with the patient.
+#
+# Nothing in this file executes. Conditions are declarative and are checked by
+# overturn/engine/packs.py.
+
+id: coding_error
+version: 1.0.0
+display_name: "Coding or Billing Error"
+
+match:
+  any_of:
+    # X12 CARC 4: procedure code inconsistent with the modifier used.
+    # X12 CARC 11: diagnosis inconsistent with the procedure.
+    # X12 CARC 16: claim lacks information or has submission/billing errors.
+    - reason_code_in: ["CO-4", "CO-11", "CO-16"]
+    - phrase_matches:
+        - "coding error"
+        - "billing error"
+        - "incorrect procedure code"
+        - "invalid procedure code"
+        - "inconsistent with the procedure"
+        - "inconsistent with the modifier"
+        - "claim lacks information"
+  min_confidence: 0.75
+
+required_facts:
+  - denial.notice_date
+  - service.description
+  - service.cpt_codes
+  - service.date_of_service
+  - provider.name
+
+required_evidence:
+  - id: corrected_claim
+    label: "Corrected claim or itemized bill with the accurate codes"
+    source: provider_records
+    blocking: true
+
+  - id: medical_record_supporting_codes
+    label: "Medical record supporting the codes billed"
+    source: provider_records
+    blocking: false
+
+  - id: billing_office_letter
+    label: "Letter from the provider's billing office explaining the correction"
+    source: provider_records
+    blocking: false
+
+deadline_regime: aca_internal
+
+argument_skeleton:
+  - id: opening
+    claim: >-
+      The claim for {service.description} on {service.date_of_service} was denied on
+      {denial.notice_date} for a coding or billing error. This letter appeals that
+      determination.
+    requires_facts:
+      - service.description
+      - service.date_of_service
+      - denial.notice_date
+
+  - id: codes_billed
+    claim: >-
+      The service was billed by {provider.name} under procedure code(s)
+      {service.cpt_codes}.
+    requires_facts:
+      - provider.name
+      - service.cpt_codes
+
+  - id: corrected_claim
+    claim: >-
+      A corrected claim is attached. The denial rested on how the service was coded, not on
+      whether the service is covered.
+    requires_evidence:
+      - corrected_claim
+
+  - id: record_supports_codes
+    claim: >-
+      The attached medical record documents the service as billed.
+    requires_evidence:
+      - medical_record_supporting_codes
+
+  - id: billing_explanation
+    claim: >-
+      The provider's billing office explains the correction in the attached letter.
+    requires_evidence:
+      - billing_office_letter

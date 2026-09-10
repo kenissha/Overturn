@@ -86,3 +86,28 @@ or a real insurer is used, and every insurer, provider and patient name is ficti
 How the corpus resists measuring an extractor against its own generator, and what it
 cannot account for, is set out in `docs/eval-results.md`. Adding redacted real denial
 letters is the most valuable single improvement available to the evaluation.
+
+---
+
+## Denial reason codes
+
+Rule packs recognise payer reason codes from the X12 Claim Adjustment Reason Code (CARC)
+list, published by X12 (x12.org). The codes the packs use:
+
+| Code | Meaning | Pack |
+|---|---|---|
+| CO-50 | Not deemed a medical necessity by the payer | `medical_necessity` |
+| CO-197, CO-198 | Precertification or authorization absent, or exceeded | `prior_authorization` |
+| CO-15 | Authorization number missing, invalid or not applicable | `prior_authorization` |
+| CO-242 | Services not provided by network or primary care providers | `out_of_network` |
+| CO-4, CO-11, CO-16 | Modifier or diagnosis inconsistent with the procedure; claim lacks information or has billing errors | `coding_error` |
+| CO-55 | Procedure, treatment or drug deemed experimental or investigational | `experimental` |
+
+The first version of the medical necessity pack also claimed CO-55 and CO-167. CO-55 is the
+experimental code and CO-167 means the diagnosis is not covered; neither is a medical
+necessity denial, and routing them there would have argued against a reason the plan did
+not give. Both were removed in `medical_necessity@1.1.0`.
+
+> **Verification status: to be confirmed against the current CARC list before
+> submission.** Codes are revised by X12 on a schedule. Phrase matching does not depend on
+> them, so a stale code would fail to match rather than misclassify.

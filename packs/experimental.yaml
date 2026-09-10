@@ -1,0 +1,95 @@
+# Denial category: the plan calls the treatment experimental or investigational.
+#
+# These turn on evidence rather than paperwork: what the published literature, regulators
+# and clinical guidelines say about this treatment for this condition, and why the treating
+# physician chose it. The physician's letter is the one piece no search can produce.
+#
+# Nothing in this file executes. Conditions are declarative and are checked by
+# overturn/engine/packs.py.
+
+id: experimental
+version: 1.0.0
+display_name: "Experimental or Investigational"
+
+match:
+  any_of:
+    # X12 CARC 55: procedure/treatment/drug deemed experimental/investigational by the payer.
+    - reason_code_in: ["CO-55"]
+    - phrase_matches:
+        - "experimental"
+        - "investigational"
+        - "unproven"
+        - "not generally accepted"
+        - "not proven effective"
+  min_confidence: 0.75
+
+required_facts:
+  - denial.notice_date
+  - denial.cited_policy_section
+  - service.description
+  - service.date_of_service
+
+required_evidence:
+  - id: physician_letter
+    label: "Letter from the treating physician explaining why this treatment was chosen"
+    source: treating_physician
+    human_only: true
+    blocking: true
+
+  - id: peer_reviewed_literature
+    label: "Peer-reviewed studies supporting this treatment for this condition"
+    source: public_reference
+    blocking: true
+
+  - id: regulatory_status
+    label: "FDA approval or clearance status for this use"
+    source: public_reference
+    blocking: false
+
+  - id: clinical_guideline
+    label: "Clinical guideline recommending this treatment"
+    source: public_reference
+    blocking: false
+
+deadline_regime: aca_internal
+
+argument_skeleton:
+  - id: opening
+    claim: >-
+      The claim for {service.description} was denied on {denial.notice_date} as experimental
+      or investigational. This letter appeals that determination.
+    requires_facts:
+      - service.description
+      - denial.notice_date
+
+  - id: standard_challenge
+    claim: >-
+      The denial relies on {denial.cited_policy_section}. The evidence below shows this
+      treatment is an accepted option for this condition.
+    requires_facts:
+      - denial.cited_policy_section
+
+  - id: physician_rationale
+    claim: >-
+      The treating physician explains in the attached letter why this treatment was chosen
+      for this patient.
+    requires_evidence:
+      - physician_letter
+
+  - id: literature
+    claim: >-
+      Peer-reviewed studies support this treatment for this condition. They are attached.
+    requires_evidence:
+      - peer_reviewed_literature
+
+  - id: regulatory_status
+    claim: >-
+      The treatment's regulatory status for this use is documented in the attached record.
+    requires_evidence:
+      - regulatory_status
+
+  - id: guideline
+    claim: >-
+      A published clinical guideline recommends this treatment, as attached.
+    requires_evidence:
+      - clinical_guideline

@@ -81,6 +81,8 @@ switched, including to a local model, without code changes.
 
 ## How it works
 
+![Overturn architecture: the model reads, code decides, a person files](docs/architecture-diagram.png)
+
 Three layers, with a single source of truth between them.
 
 ```
@@ -136,7 +138,8 @@ it, which facts and documents an appeal needs, and the paragraphs it may contain
 paragraph is written only when every fact it names is established and every document it
 relies on is on file; otherwise it is omitted and the reason is shown. Placeholders are
 filled from the ledger, so the draft contains no sentence a model wrote. Packs contain no
-executable code. Two ship today: medical necessity and prior authorization.
+executable code. Five ship today: medical necessity, prior authorization, provider out of
+network, coding or billing error, and experimental or investigational treatment.
 
 ---
 
@@ -276,13 +279,14 @@ tests/         ledger, engine, packs, agents, api, eval, red team
 
 ## Status
 
-Built and tested: the ledger with verified citations; the deterministic engine; two rule
+Built and tested: the ledger with verified citations; the deterministic engine; five rule
 packs; the extraction agent and its model layer; the pipeline, background tick, API and
 interface; the evaluation corpus and calibrated harness; the structural red-team suite.
 
 Not yet: model-backed evaluation numbers (awaiting model access), deployment to Amazon
-Bedrock AgentCore, OCR for scanned letters, and the three remaining rule packs
-(out-of-network, coding error, experimental).
+Bedrock AgentCore, and OCR for scanned letters. The evaluation corpus covers the first two
+rule packs; the other three are exercised by classification and pack tests, not yet by
+corpus letters.
 
 ---
 

@@ -165,3 +165,49 @@ def test_a_reading_below_the_pack_confidence_threshold_is_treated_as_absent(regi
     result = classify(case_with(denial__reason_text=("not medically necessary", 0.40)), registry)
     assert result.selected is None
     assert result.candidates == ()
+
+
+# --- the full set of packs -------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("reason", "pack_id"),
+    [
+        ("The provider is not a participating provider in your plan.", "out_of_network"),
+        ("Services were rendered by an out-of-network provider.", "out_of_network"),
+        ("The claim was denied due to a billing error.", "coding_error"),
+        ("The diagnosis is inconsistent with the procedure billed.", "coding_error"),
+        ("The requested treatment is considered experimental.", "experimental"),
+        ("This therapy is investigational for your condition.", "experimental"),
+    ],
+)
+def test_each_category_is_recognised_by_its_phrasing(registry, reason, pack_id):
+    result = classify(case_with(denial__reason_text=reason), registry)
+    assert result.selected is not None, result.explanation
+    assert result.selected.id == pack_id
+
+
+@pytest.mark.parametrize(
+    ("code", "pack_id"),
+    [
+        ("CO-242", "out_of_network"),
+        ("CO-16", "coding_error"),
+        ("CO-55", "experimental"),
+    ],
+)
+def test_each_category_is_recognised_by_its_reason_code(registry, code, pack_id):
+    assert classify(case_with(denial__reason_code=code), registry).selected.id == pack_id
+
+
+def test_an_experimental_code_is_not_filed_as_medical_necessity(registry):
+    """CO-55 once sat in the medical necessity pack. Appealing necessity when the plan
+    said 'experimental' answers a reason the plan did not give."""
+    assert classify(case_with(denial__reason_code="CO-55"), registry).selected.id != (
+        "medical_necessity"
+    )
+
+
+def test_a_diagnosis_exclusion_is_not_forced_into_a_category(registry):
+    result = classify(case_with(denial__reason_code="CO-167"), registry)
+    assert result.selected is None
+    assert result.candidates == ()

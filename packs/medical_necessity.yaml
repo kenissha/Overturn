@@ -8,7 +8,7 @@
 # status or value it must have, and are checked by overturn/engine/packs.py.
 
 id: medical_necessity
-version: 1.0.0
+version: 1.1.0
 display_name: "Not Medically Necessary"
 
 # How the classifier recognises this category. Any one rule matching is enough; the
@@ -16,7 +16,10 @@ display_name: "Not Medically Necessary"
 # another pack scores within its ambiguity margin.
 match:
   any_of:
-    - reason_code_in: ["CO-50", "CO-55", "CO-167"]
+    # X12 CARC 50: not deemed a medical necessity by the payer.
+    # 1.1.0 removed CO-55 (experimental, now its own pack) and CO-167 (diagnosis
+    # not covered), which had been misfiled here.
+    - reason_code_in: ["CO-50"]
     - phrase_matches:
         - "not medically necessary"
         - "does not meet medical necessity"
