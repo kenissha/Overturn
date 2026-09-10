@@ -138,10 +138,6 @@ def evaluate(
     return GateResult(escalations=kept, silent=tuple(silent))
 
 
-FILING_DEADLINES = frozenset({"deadline.internal_appeal_due", "deadline.external_review_due"})
-"""Windows for the advocate to file in. Once filing is recorded they are met, not pending."""
-
-
 # --- trigger 3: deadline pressure ------------------------------------------------------
 
 
@@ -155,11 +151,13 @@ def _deadline_escalations(
         return []
 
     out: list[Escalation] = []
-    filed = case.value("appeal.filed_date") is not None
     for deadline in deadlines.deadlines:
-        if filed and deadline.field in FILING_DEADLINES:
+        if deadline.met_on is not None:
             # A window a person has already met is not pressing, however close its date.
-            silent.append(f"{deadline.field} met: the appeal is recorded as filed.")
+            silent.append(
+                f"{deadline.field} met: the appeal is recorded as filed on "
+                f"{deadline.met_on.isoformat()}."
+            )
             continue
         pressure = deadline.pressure(today)
         remaining = deadline.days_remaining(today)

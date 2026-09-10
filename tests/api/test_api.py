@@ -238,3 +238,17 @@ def test_without_an_extractor_documents_are_stored_but_not_read(tmp_path, corpus
     assert body["extractor"] is False
     assert body["documents_read"] == 0
     assert body["case"]["state"] == "INTAKE"
+
+
+def test_the_quiet_count_is_every_file_that_needs_no_one(client, corpus):
+    for sample in [s for s in corpus if s.is_clean][:4]:
+        processed(client, sample)
+    queue = client.get("/api/queue").json()
+    total = len(client.get("/api/cases").json())
+    assert queue["attention_total"] + queue["quiet_count"] == total
+
+
+def test_a_pinned_clock_is_reported_so_the_interface_can_say_so(tmp_path):
+    health = TestClient(create_app(data_dir=tmp_path, today=lambda: TODAY)).get("/api/health")
+    assert health.json()["today"] == TODAY.isoformat()
+    assert health.json()["fixed_clock"] is True

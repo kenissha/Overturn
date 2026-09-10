@@ -221,3 +221,8 @@ mark.anomaly.sev-warn { background: #fcefe4; border-bottom-color: var(--urgent);
 table.audit tr.refused td { background: #fdf3f1; }
 table.audit tbody tr { cursor: default; }
 .plain { list-style: none; padding: 0; margin: 0; }
+
+/* a filing window a person has already met: drawn, but no longer pressing */
+.strip-row.met .bar { background: var(--line-strong); }
+.strip-row.met .tick.due { background: var(--line-strong); }
+.strip-met { color: var(--ok); font-weight: 600; }

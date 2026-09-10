@@ -134,9 +134,8 @@ def classify(case: Case, registry: PackRegistry) -> Classification:
         selected=top.pack,
         candidates=tuple(candidates),
         ambiguous=False,
-        explanation=f"Matched {top.pack.display_name}: " + "; ".join(
-            s.describe() for s in top.signals
-        ),
+        explanation=f"Matched {top.pack.display_name}: "
+        + "; ".join(s.describe() for s in top.signals),
     )
 
 

@@ -162,8 +162,6 @@ def test_a_missing_fact_is_not_matched_against(registry):
 
 def test_a_reading_below_the_pack_confidence_threshold_is_treated_as_absent(registry):
     """Classification branches the whole pipeline; it does not build on a weak reading."""
-    result = classify(
-        case_with(denial__reason_text=("not medically necessary", 0.40)), registry
-    )
+    result = classify(case_with(denial__reason_text=("not medically necessary", 0.40)), registry)
     assert result.selected is None
     assert result.candidates == ()

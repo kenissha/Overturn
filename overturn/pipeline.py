@@ -191,10 +191,11 @@ class Pipeline:
         readiness = assess(case, pack) if pack else None
         deadlines = compute_deadlines(case)
         anomalies = self.anomalies(case)
+        settled = case.state in PERSON_ONLY_STATES  # filed: preparation is moot
         gate = run_gate(
             case,
-            classification=classification,
-            readiness=readiness,
+            classification=None if settled else classification,
+            readiness=None if settled else readiness,
             deadlines=deadlines,
             anomalies=anomalies,
             today=today,

@@ -11,6 +11,9 @@ Run locally:
 
 ``OVERTURN_EXTRACTOR=model`` enables the extraction agent (and a paid model call per
 denial letter). Without it, documents are stored and scanned but not read for facts.
+
+``OVERTURN_TODAY=YYYY-MM-DD`` pins the clock for a demonstration. The interface labels a
+pinned clock rather than presenting it as the real date.
 """
 
 from __future__ import annotations
@@ -93,7 +96,13 @@ def create_app(
 
     @app.get("/api/health")
     def health() -> dict[str, Any]:
-        return {"ok": True, "extractor": extractor is not None, "packs": pipeline.registry.ids}
+        return {
+            "ok": True,
+            "extractor": extractor is not None,
+            "packs": pipeline.registry.ids,
+            "today": clock().isoformat(),
+            "fixed_clock": today is not None,
+        }
 
     @app.get("/api/queue")
     def queue() -> dict[str, Any]:
@@ -104,7 +113,7 @@ def create_app(
             "today": clock().isoformat(),
             "attention": attention[:QUEUE_CARDS],
             "attention_total": len(attention),
-            "quiet_count": len(summaries) - min(len(attention), QUEUE_CARDS),
+            "quiet_count": len(summaries) - len(attention),
         }
 
     @app.get("/api/cases")
@@ -274,9 +283,13 @@ def app_from_env() -> FastAPI:
 
         extractor = StrandsExtractor(lambda: build_model("extraction"))
 
+    fixed = os.environ.get("OVERTURN_TODAY")
+    clock = (lambda: date.fromisoformat(fixed)) if fixed else None
+
     origins = os.environ.get("OVERTURN_CORS")
     return create_app(
         data_dir=os.environ.get("OVERTURN_DATA_DIR", ROOT / "data"),
         extractor=extractor,
+        today=clock,
         cors_origins=origins.split(",") if origins else None,
     )

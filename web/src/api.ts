@@ -51,6 +51,7 @@ export interface Deadline {
   anchor_is_estimated: boolean;
   days_remaining: number;
   pressure: Pressure;
+  met_on: string | null;
 }
 
 export interface Escalation {
@@ -202,6 +203,8 @@ export interface Health {
   ok: boolean;
   extractor: boolean;
   packs: string[];
+  today: string;
+  fixed_clock: boolean;
 }
 
 const USER = "advocate";

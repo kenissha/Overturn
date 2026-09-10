@@ -27,7 +27,8 @@ export function App() {
     api.health().then(setHealth).catch(() => setHealth(null));
   }, []);
 
-  const today = new Date().toISOString().slice(0, 10);
+  // The engine's clock, not the browser's: deadlines are computed against it.
+  const today = health?.today ?? new Date().toISOString().slice(0, 10);
   const [section, id, tab] = route;
 
   return (
@@ -50,12 +51,15 @@ export function App() {
               Reading is off — documents are stored and scanned, not read
             </span>
           )}
-          <span className="muted">{fmtDate(today)}</span>
+          <span className="muted">
+            {fmtDate(today)}
+            {health?.fixed_clock && <span title="The API clock is pinned for a demonstration"> · demo clock</span>}
+          </span>
         </div>
       </header>
       <main>
         {section === "case" && id ? (
-          <CaseView caseId={id} tab={tab ?? "ledger"} extractor={health?.extractor ?? false} />
+          <CaseView caseId={id} tab={tab ?? "ledger"} extractor={health?.extractor ?? false} today={today} />
         ) : section === "files" ? (
           <CaseList />
         ) : (

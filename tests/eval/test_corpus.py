@@ -58,9 +58,7 @@ def test_both_packs_are_represented_in_balance(corpus):
 def test_style_basis_is_labelled_honestly(corpus):
     """Only the model-notice style claims a basis beyond 'synthetic'."""
     for s in corpus:
-        expected = (
-            "federal_model_notice_structure" if s.style == "model_notice" else "synthetic"
-        )
+        expected = "federal_model_notice_structure" if s.style == "model_notice" else "synthetic"
         assert s.style_basis == expected
 
 
@@ -97,9 +95,7 @@ def test_the_statutory_window_is_not_mistaken_for_a_stated_deadline(corpus):
 
 def test_missing_optional_fields_actually_occur(corpus):
     """Abstention can only be measured if the corpus contains things to abstain on."""
-    absent = Counter(
-        name for s in corpus for name, g in s.gold.items() if g.value is None
-    )
+    absent = Counter(name for s in corpus for name, g in s.gold.items() if g.value is None)
     assert absent["denial.reason_code"] >= 5
     assert absent["denial.cited_policy_section"] >= 5
     assert absent["denial.stated_appeal_deadline"] >= 10

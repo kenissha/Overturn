@@ -223,3 +223,14 @@ def test_a_planted_instruction_is_reported_not_obeyed(pipeline, corpus):
 
     assert snapshot.gate.by_trigger(Trigger.DOCUMENT_ANOMALY)
     assert snapshot.case.state not in (CaseState.SUBMITTED, CaseState.CLOSED_DEADLINE_MISSED)
+
+
+def test_after_filing_only_the_clock_and_the_documents_can_raise_a_question(pipeline, corpus):
+    """Once the packet has gone, asking for more of it is noise."""
+    case_id = open_with(pipeline, medical_necessity_letter(corpus))
+    pipeline.process(case_id, today=TODAY)
+    snapshot = pipeline.mark_filed(case_id, date(2026, 9, 12), by=ADVOCATE, today=TODAY)
+    assert {e.trigger for e in snapshot.escalations} <= {
+        Trigger.DEADLINE_PRESSURE,
+        Trigger.DOCUMENT_ANOMALY,
+    }

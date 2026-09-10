@@ -29,7 +29,7 @@ Sources for every figure are recorded in docs/sources.md.
 from __future__ import annotations
 
 import calendar
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, timedelta
 from enum import StrEnum
 
@@ -79,6 +79,9 @@ REGIMES: dict[Regime, RegimeSpec] = {
     ),
 }
 
+FILING_DEADLINES = frozenset({"deadline.internal_appeal_due", "deadline.external_review_due"})
+"""Windows the advocate files within. Once a filing is recorded they are met."""
+
 INTERNAL_FILING_DAYS = 180
 """Identical across every internal regime, which is why the filing deadline can be
 computed without knowing whether the claim was pre- or post-service."""
@@ -101,11 +104,11 @@ class Pressure(StrEnum):
     """How close a deadline is, in the bands the escalation gate acts on."""
 
     NONE = "none"
-    INFO = "info"          # T-30: visible, not notified
+    INFO = "info"  # T-30: visible, not notified
     ELEVATED = "elevated"  # T-14: escalation
-    URGENT = "urgent"      # T-7
+    URGENT = "urgent"  # T-7
     CRITICAL = "critical"  # T-3
-    EXPIRED = "expired"    # T-0 and past
+    EXPIRED = "expired"  # T-0 and past
 
     @property
     def escalates(self) -> bool:
@@ -131,11 +134,15 @@ class ComputedDeadline:
     anchor_date: date
     anchor_is_estimated: bool
     rule: str
+    met_on: date | None = None
+    """Set once a person records the filing. A met window is no longer pressing."""
 
     def days_remaining(self, today: date) -> int:
         return (self.due - today).days
 
     def pressure(self, today: date) -> Pressure:
+        if self.met_on is not None:
+            return Pressure.NONE
         remaining = self.days_remaining(today)
         if remaining < 0:
             return Pressure.EXPIRED
@@ -285,9 +292,7 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
 
     # --- filing deadline -------------------------------------------------------
     stated = _as_date(case.value("denial.stated_appeal_deadline"))
-    filing_field = (
-        "deadline.external_review_due" if is_external else "deadline.internal_appeal_due"
-    )
+    filing_field = "deadline.external_review_due" if is_external else "deadline.internal_appeal_due"
 
     if stated is not None:
         deadlines.append(
@@ -386,6 +391,12 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
                     ),
                 )
             )
+
+    filed = _as_date(case.value("appeal.filed_date"))
+    if filed is not None:
+        deadlines = [
+            replace(d, met_on=filed) if d.field in FILING_DEADLINES else d for d in deadlines
+        ]
 
     return DeadlineComputation(
         deadlines=tuple(deadlines),

@@ -97,6 +97,7 @@ def deadline_view(d: ComputedDeadline, today: date) -> dict[str, Any]:
         "anchor_is_estimated": d.anchor_is_estimated,
         "days_remaining": d.days_remaining(today),
         "pressure": d.pressure(today).value,
+        "met_on": d.met_on.isoformat() if d.met_on else None,
     }
 
 
@@ -264,7 +265,8 @@ def snapshot_view(s: CaseSnapshot, today: date) -> dict[str, Any]:
 
 def case_summary(s: CaseSnapshot, today: date) -> dict[str, Any]:
     """One row of the morning queue: why this case wants attention today, if it does."""
-    next_deadline = min(s.deadlines.deadlines, key=lambda d: d.due, default=None)
+    still_open = [d for d in s.deadlines.deadlines if d.met_on is None]
+    next_deadline = min(still_open, key=lambda d: d.due, default=None)
     top = s.escalations[0] if s.escalations else None
     blocking = [e for e in s.escalations if e.blocking]
     if blocking:

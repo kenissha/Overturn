@@ -10,7 +10,17 @@ import { STATE_LABEL } from "../format";
 
 // Screen 2, the heart of the demo: the letter on the left, the ledger on the right, and
 // the questions only a person can answer beside them.
-export function CaseView({ caseId, tab, extractor }: { caseId: string; tab: string; extractor: boolean }) {
+export function CaseView({
+  caseId,
+  tab,
+  extractor,
+  today,
+}: {
+  caseId: string;
+  tab: string;
+  extractor: boolean;
+  today: string;
+}) {
   const [data, setData] = useState<Case | null>(null);
   const [texts, setTexts] = useState<Record<string, DocumentText>>({});
   const [docId, setDocId] = useState<string | null>(null);
@@ -80,7 +90,6 @@ export function CaseView({ caseId, tab, extractor }: { caseId: string; tab: stri
   const service = data.ledger.find((f) => f.field === "service.description")?.value as string | undefined;
   const issuer = data.ledger.find((f) => f.field === "plan.issuer")?.value as string | undefined;
   const unread = data.state === "INTAKE" && data.ledger.every((f) => f.status === "not_looked_for");
-  const today = new Date().toISOString().slice(0, 10);
   const current = docId ? texts[docId] : undefined;
 
   return (

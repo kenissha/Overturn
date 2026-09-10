@@ -56,9 +56,7 @@ def test_pre_service_claim_selects_the_thirty_day_response_regime():
 
 
 def test_urgency_overrides_the_pre_post_service_split():
-    regime, _ = select_regime(
-        case_with(service__is_pre_service=False, service__was_urgent=True)
-    )
+    regime, _ = select_regime(case_with(service__is_pre_service=False, service__was_urgent=True))
     assert regime is Regime.ACA_URGENT
 
 
@@ -106,9 +104,10 @@ def test_the_fallback_can_only_shorten_the_window():
         case_with(denial__notice_date="2026-08-01", service__is_pre_service=False)
     )
 
-    assert notice_only.get("deadline.internal_appeal_due").due <= both.get(
-        "deadline.internal_appeal_due"
-    ).due
+    assert (
+        notice_only.get("deadline.internal_appeal_due").due
+        <= both.get("deadline.internal_appeal_due").due
+    )
 
 
 def test_no_anchor_means_no_deadline_is_invented():
@@ -170,18 +169,14 @@ def test_the_filing_window_is_computed_before_the_claim_is_classified():
 
 
 def test_external_review_runs_four_months_not_one_hundred_twenty_days():
-    result = compute_deadlines(
-        case_with(denial__is_final=True, denial__received_date="2026-08-01")
-    )
+    result = compute_deadlines(case_with(denial__is_final=True, denial__received_date="2026-08-01"))
     due = result.get("deadline.external_review_due")
     assert due.due == date(2026, 12, 1)
     assert due.regime is Regime.ACA_EXTERNAL
 
 
 def test_external_review_does_not_produce_an_internal_appeal_deadline():
-    result = compute_deadlines(
-        case_with(denial__is_final=True, denial__received_date="2026-08-01")
-    )
+    result = compute_deadlines(case_with(denial__is_final=True, denial__received_date="2026-08-01"))
     assert result.get("deadline.internal_appeal_due") is None
 
 
@@ -255,11 +250,11 @@ def test_month_addition_clamps_to_the_end_of_the_month(start, months, expected):
     ("today", "expected"),
     [
         (date(2026, 1, 1), Pressure.NONE),
-        (date(2026, 12, 29), Pressure.INFO),      # 30 days out
-        (date(2027, 1, 14), Pressure.ELEVATED),   # 14
-        (date(2027, 1, 21), Pressure.URGENT),     # 7
-        (date(2027, 1, 25), Pressure.CRITICAL),   # 3
-        (date(2027, 1, 28), Pressure.CRITICAL),   # due today
+        (date(2026, 12, 29), Pressure.INFO),  # 30 days out
+        (date(2027, 1, 14), Pressure.ELEVATED),  # 14
+        (date(2027, 1, 21), Pressure.URGENT),  # 7
+        (date(2027, 1, 25), Pressure.CRITICAL),  # 3
+        (date(2027, 1, 28), Pressure.CRITICAL),  # due today
         (date(2027, 1, 29), Pressure.EXPIRED),
     ],
 )
@@ -278,3 +273,19 @@ def test_only_the_upper_bands_escalate():
     assert Pressure.URGENT.escalates
     assert Pressure.CRITICAL.escalates
     assert Pressure.EXPIRED.escalates
+
+
+def test_recording_the_filing_meets_the_filing_window():
+    case = case_with(denial__received_date="2026-08-01", service__is_pre_service=False)
+    case.facts["appeal.filed_date"] = Fact(
+        field="appeal.filed_date",
+        value="2027-01-20",
+        status=FactStatus.HUMAN_ANSWERED,
+        verified_by="user_004",
+        recorded_by="user_004",
+    )
+    result = compute_deadlines(case)
+    filing = result.get("deadline.internal_appeal_due")
+    assert filing.met_on == date(2027, 1, 20)
+    assert filing.pressure(date(2027, 1, 27)) is Pressure.NONE
+    assert result.get("deadline.plan_response_due").met_on is None

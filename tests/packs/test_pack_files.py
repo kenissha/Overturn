@@ -64,9 +64,7 @@ def test_the_two_shipped_packs_do_not_share_reason_codes(registry):
     for pack in registry:
         for rule in pack.match.any_of:
             for code in rule.reason_code_in:
-                assert code not in seen, (
-                    f"{code} is claimed by both {seen.get(code)} and {pack.id}"
-                )
+                assert code not in seen, f"{code} is claimed by both {seen.get(code)} and {pack.id}"
                 seen[code] = pack.id
 
 

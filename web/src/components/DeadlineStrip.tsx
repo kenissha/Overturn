@@ -20,10 +20,14 @@ export function DeadlineStrip({ deadlines, today }: { deadlines: Case["deadlines
   return (
     <div className="strip">
       {rows.map((d) => (
-        <div key={d.field} className={`strip-row p-${d.pressure}`}>
+        <div key={d.field} className={`strip-row p-${d.pressure} ${d.met_on ? "met" : ""}`}>
           <div className="strip-label">
             <strong>{fieldLabel(d.field)}</strong> {fmtDate(d.due)}{" "}
-            <span className="strip-days">{daysText(d.days_remaining)}</span>
+            {d.met_on ? (
+              <span className="strip-met">met · filed {fmtDate(d.met_on)}</span>
+            ) : (
+              <span className="strip-days">{daysText(d.days_remaining)}</span>
+            )}
             {PRESSURE_LABEL[d.pressure] && <span className="strip-pressure"> · {PRESSURE_LABEL[d.pressure]}</span>}
             <div className="muted small">
               {d.basis === "stated_in_letter" ? "Printed in the letter." : `Statutory default: ${d.rule}.`}
