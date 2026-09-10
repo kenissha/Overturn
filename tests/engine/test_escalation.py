@@ -181,11 +181,11 @@ def test_a_conflict_asks_which_reading_to_proceed_on(registry, pack):
 @pytest.mark.parametrize(
     ("today", "should_escalate"),
     [
-        (date(2026, 12, 1), False),   # far out
-        (date(2027, 1, 5), False),    # 23 days: visible, silent
-        (date(2027, 1, 16), True),    # 12 days
-        (date(2027, 1, 24), True),    # 4 days
-        (date(2027, 2, 1), True),     # past
+        (date(2026, 12, 1), False),  # far out
+        (date(2027, 1, 5), False),  # 23 days: visible, silent
+        (date(2027, 1, 16), True),  # 12 days
+        (date(2027, 1, 24), True),  # 4 days
+        (date(2027, 2, 1), True),  # past
     ],
 )
 def test_deadline_pressure_escalates_only_in_the_upper_bands(
@@ -325,3 +325,18 @@ def test_the_same_question_on_another_case_is_a_separate_escalation():
     assert escalation_id("case_1", Trigger.HUMAN_JUDGMENT, "x") != escalation_id(
         "case_2", Trigger.HUMAN_JUDGMENT, "x"
     )
+
+
+def test_a_filed_appeal_meets_its_filing_deadline(registry, pack):
+    """Once a person records the filing, that window is met, not pressing."""
+    case = ready_case(pack)
+    case.facts["appeal.filed_date"] = Fact(
+        field="appeal.filed_date",
+        value="2027-01-20",
+        status=FactStatus.HUMAN_ANSWERED,
+        verified_by="user_004",
+        recorded_by="user_004",
+    )
+    result = gate(case, registry, pack, today=date(2027, 1, 24))
+    assert result.by_trigger(Trigger.DEADLINE_PRESSURE) == ()
+    assert any("recorded as filed" in line for line in result.silent)

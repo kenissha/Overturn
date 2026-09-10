@@ -138,6 +138,10 @@ def evaluate(
     return GateResult(escalations=kept, silent=tuple(silent))
 
 
+FILING_DEADLINES = frozenset({"deadline.internal_appeal_due", "deadline.external_review_due"})
+"""Windows for the advocate to file in. Once filing is recorded they are met, not pending."""
+
+
 # --- trigger 3: deadline pressure ------------------------------------------------------
 
 
@@ -151,7 +155,12 @@ def _deadline_escalations(
         return []
 
     out: list[Escalation] = []
+    filed = case.value("appeal.filed_date") is not None
     for deadline in deadlines.deadlines:
+        if filed and deadline.field in FILING_DEADLINES:
+            # A window a person has already met is not pressing, however close its date.
+            silent.append(f"{deadline.field} met: the appeal is recorded as filed.")
+            continue
         pressure = deadline.pressure(today)
         remaining = deadline.days_remaining(today)
 
@@ -184,8 +193,7 @@ def _deadline_escalations(
             )
             why = (
                 "Filing after the window usually ends the internal route, but a stated "
-                "date can be wrong and some plans accept late filings for good cause. "
-                + basis_note
+                "date can be wrong and some plans accept late filings for good cause. " + basis_note
             )
             options = ("File anyway", "Move to external review", "Close the case")
         else:
@@ -256,9 +264,7 @@ def _judgment_escalations(
         names = ", ".join(c.pack.display_name for c in classification.candidates[:3])
         out.append(
             Escalation(
-                escalation_id=escalation_id(
-                    case.case_id, Trigger.HUMAN_JUDGMENT, "classification"
-                ),
+                escalation_id=escalation_id(case.case_id, Trigger.HUMAN_JUDGMENT, "classification"),
                 case_id=case.case_id,
                 trigger=Trigger.HUMAN_JUDGMENT,
                 subject="classification",
@@ -406,9 +412,7 @@ def _document_escalations(
             )
         )
 
-    ordinary = [
-        item for item in readiness.missing_blocking_evidence if not item.human_only
-    ]
+    ordinary = [item for item in readiness.missing_blocking_evidence if not item.human_only]
     if ordinary:
         silent.append(
             f"{len(ordinary)} required document(s) still to be collected: "
@@ -439,9 +443,7 @@ def _anomaly_escalations(
                 subject=subject,
                 question=(
                     f"A document on this case contains something unexpected. Review "
-                    f"{anomaly.doc_id}"
-                    + (f", page {anomaly.page}" if anomaly.page else "")
-                    + "."
+                    f"{anomaly.doc_id}" + (f", page {anomaly.page}" if anomaly.page else "") + "."
                 ),
                 why_it_matters=(
                     anomaly.explanation
