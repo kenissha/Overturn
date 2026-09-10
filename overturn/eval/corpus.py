@@ -130,7 +130,27 @@ SERVICES = {
         ("Intravenous infusion therapy", ["96365"]),
         ("Outpatient cardiac stress test", ["93015"]),
     ),
+    "out_of_network": (
+        ("Emergency department visit, moderate severity", ["99284"]),
+        ("Outpatient anesthesia services", ["01402"]),
+        ("Ambulance transport, advanced life support", ["A0427"]),
+    ),
+    "coding_error": (
+        ("Office visit, established patient", ["99214"]),
+        ("Therapeutic exercise and manual therapy", ["97110", "97140"]),
+        ("Comprehensive metabolic panel", ["80053"]),
+    ),
+    "experimental": (
+        ("Transcranial magnetic stimulation therapy", ["90867"]),
+        ("Proton beam radiation therapy", ["77522"]),
+        ("Gene expression profiling test", ["81599"]),
+    ),
 }
+
+ORIGINAL_CATEGORIES = ("medical_necessity", "prior_authorization")
+"""The categories the corpus was first built with. Letters that borrow a service from
+another category draw from these alone, so adding categories later leaves every earlier
+letter byte-for-byte unchanged."""
 
 REASONS = {
     "medical_necessity": (
@@ -143,11 +163,29 @@ REASONS = {
         "there is no authorization on file for this service",
         "the service required precertification, which was not requested",
     ),
+    "out_of_network": (
+        "the provider is not a participating provider in your plan's network",
+        "the services were rendered by an out-of-network provider",
+        "the rendering provider is out of network for your plan",
+    ),
+    "coding_error": (
+        "the claim was submitted with an incorrect procedure code",
+        "the diagnosis code is inconsistent with the procedure billed",
+        "the claim lacks information needed to process it",
+    ),
+    "experimental": (
+        "the requested treatment is considered experimental for your condition",
+        "the service is investigational and not covered under your plan",
+        "the therapy is unproven for the diagnosis submitted",
+    ),
 }
 
 REASON_CODES = {
     "medical_necessity": ("CO-50",),
     "prior_authorization": ("CO-197", "CO-15"),
+    "out_of_network": ("CO-242",),
+    "coding_error": ("CO-16", "CO-4", "CO-11"),
+    "experimental": ("CO-55",),
 }
 
 SECTIONS = (
@@ -198,7 +236,15 @@ class _Letter:
 @dataclass(frozen=True)
 class Scenario:
     sample_id: str
-    category: Literal["medical_necessity", "prior_authorization", "multi", "out_of_scope"]
+    category: Literal[
+        "medical_necessity",
+        "prior_authorization",
+        "out_of_network",
+        "coding_error",
+        "experimental",
+        "multi",
+        "out_of_scope",
+    ]
     style: str
     issuer: str
     provider: str
@@ -419,7 +465,7 @@ def render(s: Scenario) -> Sample:
     gold = _locate_gold(s.sample_id, pages, letter.emitted)
 
     expected_pack: str | None
-    if s.category in ("medical_necessity", "prior_authorization"):
+    if s.category in SERVICES:
         expected_pack = s.category
     else:
         expected_pack = None
@@ -473,7 +519,7 @@ def _random_scenario(
     style: str,
     **overrides,
 ) -> Scenario:
-    base_category = category if category in SERVICES else rng.choice(tuple(SERVICES))
+    base_category = category if category in SERVICES else rng.choice(ORIGINAL_CATEGORIES)
     service, cpt = rng.choice(SERVICES[base_category])
     notice = date(2026, 7, 1) + timedelta(days=rng.randrange(0, 60))
     dos = notice - timedelta(days=rng.randrange(5, 40))
@@ -576,5 +622,11 @@ def build_corpus(seed: int = 20260910) -> list[Sample]:
                 tags=("no_notice_date",),
             )
         )
+
+    # The three later categories, four letters each. Appended last, so every letter
+    # above is identical to the corpus before they were added.
+    for category in ("out_of_network", "coding_error", "experimental"):
+        for i in range(4):
+            scenarios.append(_random_scenario(rng, next_id(), category, styles[i % 4]))
 
     return [render(s) for s in scenarios]

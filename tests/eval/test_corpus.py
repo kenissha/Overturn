@@ -38,7 +38,7 @@ def test_a_different_seed_changes_details_but_not_composition():
 
 
 def test_composition(corpus):
-    assert len(corpus) == 48
+    assert len(corpus) == 60
     assert sum(s.expected_ambiguous for s in corpus) == 6
     assert sum("out_of_scope" in s.tags for s in corpus) == 4
     assert sum(bool(s.expected_anomalies) for s in corpus) == 8
@@ -134,3 +134,26 @@ def test_names_are_fictional(corpus):
 
     for s in corpus:
         assert s.gold["plan.issuer"].value in ISSUERS
+
+
+ORIGINAL_48_DIGEST = "6b023dbe00d963cbe2dc2fdd3932d26fffe3f948285625175c55f478ab41976d"
+"""SHA-256 of the first 48 letters' text, recorded before the later categories were added."""
+
+
+def test_every_installed_rule_pack_has_letters(corpus):
+    """A pack the corpus never exercises is a pack whose classification is unmeasured."""
+    from pathlib import Path
+
+    from overturn.engine.packs import PackRegistry
+
+    registry = PackRegistry.from_directory(Path(__file__).resolve().parents[2] / "packs")
+    covered = {s.expected_pack for s in corpus if s.expected_pack}
+    assert covered == set(registry.ids)
+
+
+def test_adding_categories_left_the_original_letters_unchanged(corpus):
+    """The first 48 letters are what earlier results and the demo were built on."""
+    import hashlib
+
+    digest = hashlib.sha256("".join("".join(s.pages) for s in corpus[:48]).encode()).hexdigest()
+    assert digest == ORIGINAL_48_DIGEST

@@ -12,7 +12,7 @@ TODAY = date(2026, 9, 10)
 
 def test_the_seed_opens_every_corpus_letter_and_leaves_some_for_a_person(tmp_path):
     states = seed(tmp_path, today=TODAY)
-    assert sum(states.values()) == 48
+    assert sum(states.values()) == 60
     assert states["PACKET_READY"] + states["SUBMITTED"] > 0
     assert states["INTAKE"] > 0  # ambiguous and out-of-scope letters stay for a person
 
