@@ -52,7 +52,7 @@ background.
 > person today, each with the question and why it matters. Everything else is progressing
 > in the background."
 
-Point at the quiet line: *15 files are progressing in the background*.
+Point at the quiet line under the cards: *N files are progressing in the background*.
 
 > "The clock here is pinned to October 4th for the demo."
 
