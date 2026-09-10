@@ -6,12 +6,16 @@
 # something only the patient or the provider's office can produce.
 
 id: prior_authorization
-version: 1.0.0
+version: 1.1.0
 display_name: "Prior Authorization Not Obtained"
 
 match:
   any_of:
-    - reason_code_in: ["CO-197", "CO-198", "CO-15"]
+    # X12 CARC 197: precertification/authorization/notification/pre-treatment absent.
+    # X12 CARC 198: precertification/notification/authorization/pre-treatment exceeded.
+    # 1.1.0 dropped CO-15, deactivated by X12 on 2018-05-01. A letter that still prints it
+    # is recognised by its wording instead.
+    - reason_code_in: ["CO-197", "CO-198"]
     - phrase_matches:
         - "prior authorization"
         - "preauthorization"

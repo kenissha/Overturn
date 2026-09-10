@@ -211,3 +211,14 @@ def test_a_diagnosis_exclusion_is_not_forced_into_a_category(registry):
     result = classify(case_with(denial__reason_code="CO-167"), registry)
     assert result.selected is None
     assert result.candidates == ()
+
+
+def test_a_deactivated_reason_code_is_not_relied_on(registry):
+    """CO-15 was deactivated by X12 in 2018. A letter printing it is classified by its
+    wording, not by a code that no longer means anything."""
+    assert classify(case_with(denial__reason_code="CO-15"), registry).selected is None
+    worded = case_with(
+        denial__reason_code="CO-15",
+        denial__reason_text="there is no authorization on file for this service",
+    )
+    assert classify(worded, registry).selected.id == "prior_authorization"

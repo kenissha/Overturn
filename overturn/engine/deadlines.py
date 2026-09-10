@@ -376,8 +376,9 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
                         anchor_field="appeal.filed_date",
                         anchor_date=filed,
                         anchor_is_estimated=False,
-                        rule=f"{spec.plan_responds_within_days} days from filing "
-                        f"({spec.description})",
+                        rule=f"{spec.plan_responds_within_days} days from the plan's receipt "
+                        "of the appeal; the filing date is used, which is on or before receipt, "
+                        f"so this can only be early ({spec.description})",
                     )
                 )
         else:
