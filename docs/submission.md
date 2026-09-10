@@ -16,9 +16,10 @@ Good Neighbor Agents.
 
 ## Inspiration
 
-When a health insurer denies a claim, the denial is often wrong: about a third of
-internal appeals on ACA marketplace plans reverse the decision, and consumers win roughly
-45% of external reviews. Almost nobody appeals. Not because they lack a case — because the
+When a health insurer denies a claim, the denial is often wrong: on HealthCare.gov plans
+in 2024, insurers reversed a third of the denials appealed to them, and Pennsylvania's
+independent reviewers have overturned about 48% of the denials they examined. Yet fewer
+than 1% of denied claims are appealed. Not because they lack a case — because the
 process is exhausting and deadlines pass. These files are lost on procedure, not on the
 merits.
 

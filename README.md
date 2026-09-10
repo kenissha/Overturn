@@ -12,10 +12,10 @@ AWS Agents for Humans Hackathon · Good Neighbor Agents track · MIT licensed
 
 ## The problem
 
-Roughly 19% of in-network claims on 2023 ACA marketplace plans were denied. When those
-denials are appealed, a large share are reversed — about 34% of internal appeals, and
-consumers prevail in roughly 45% of external reviews. Yet the overwhelming majority of
-denials are never appealed at all.
+In 2024, insurers on HealthCare.gov denied about 19% of in-network claims. When a denial
+is appealed, a large share are reversed: insurers overturned 34% of the denials appealed
+to them, and Pennsylvania's independent external reviewers have overturned about 48% of
+the denials they examined. Yet fewer than 1% of denied claims are ever appealed.
 
 **These files are not lost on the merits. They are lost on procedure.** A deadline
 passes, the wrong document is attached, or the appeal argues against a reason the denial

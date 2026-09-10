@@ -3,9 +3,10 @@
 *Building Overturn, an insurance-denial appeal agent for patient advocates, on Strands
 Agents and Amazon Bedrock.*
 
-When a health insurer denies a claim, the denial is often wrong. On 2023 ACA marketplace
-plans, about a third of internal appeals reversed the decision, and consumers won roughly
-45% of external reviews. Yet almost nobody appeals.
+When a health insurer denies a claim, the denial is often wrong. On HealthCare.gov plans
+in 2024, insurers reversed a third of the denials appealed to them, and Pennsylvania's
+independent reviewers have overturned about 48% of the denials they examined. Yet fewer
+than 1% of denied claims are appealed.
 
 The reason is rarely that people lack a case. Appeals are lost on procedure: a deadline
 passes, the wrong document goes in, or the letter argues against a reason the insurer

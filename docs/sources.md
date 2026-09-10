@@ -1,7 +1,7 @@
 # Sources
 
 Every figure quoted in the README, and every timeframe hard-coded in the deadline engine,
-is listed here with where it came from.
+is listed here with where it came from and when it was checked.
 
 This file exists because of a specific weakness in the project's own claim to domain
 knowledge. The thesis behind Overturn — that these files are lost on procedure rather than
@@ -10,66 +10,70 @@ That observation generalises across legal systems. **ACA appeal mechanics do not
 were learned from the sources below, and the engine is written so that each rule can be
 traced back to one of them rather than to recollection.
 
+**Verification:** every row below was checked on 2026-09-10 against the regulation text
+(Cornell LII's copy of the eCFR) or the publisher's own page.
+
 ---
 
 ## Statutory timeframes used by the deadline engine
 
-| Rule | Value | Where it is used |
-|---|---|---|
-| Internal appeal filing window | 180 days from receipt of the adverse benefit determination | `INTERNAL_FILING_DAYS` in `overturn/engine/deadlines.py` |
-| Plan decision, pre-service claim | 30 days | `Regime.ACA_INTERNAL_PRE_SERVICE` |
-| Plan decision, post-service claim | 60 days | `Regime.ACA_INTERNAL_POST_SERVICE` |
-| Plan decision, urgent care claim | 72 hours | `Regime.ACA_URGENT` |
-| External review request window | 4 months from receipt of the final adverse determination | `Regime.ACA_EXTERNAL` |
-| Standard external review decision | 45 days | `Regime.ACA_EXTERNAL` |
-| Expedited external review decision | 72 hours | not yet modelled as a calendar deadline |
+| Rule | Value | Runs from | Citation | Where it is used |
+|---|---|---|---|---|
+| Internal appeal filing window | at least 180 days | receipt of the adverse benefit determination | 29 CFR 2560.503-1(h)(3)(i), incorporated by 45 CFR 147.136(b) | `INTERNAL_FILING_DAYS` |
+| Plan decision, urgent care appeal | 72 hours | the plan's receipt of the appeal | 29 CFR 2560.503-1(i)(2)(i) | `Regime.ACA_URGENT` |
+| Plan decision, pre-service appeal | 30 days | the plan's receipt of the appeal | 29 CFR 2560.503-1(i)(2)(ii) | `Regime.ACA_INTERNAL_PRE_SERVICE` |
+| Plan decision, post-service appeal | 60 days | the plan's receipt of the appeal | 29 CFR 2560.503-1(i)(2)(iii)(A) | `Regime.ACA_INTERNAL_POST_SERVICE` |
+| External review request (federal process) | 4 months | receipt of the notice of adverse or final internal adverse determination | 45 CFR 147.136(d)(2)(i) | `Regime.ACA_EXTERNAL` |
+| Standard external review decision | 45 days | the reviewer's receipt of the request | 45 CFR 147.136(d)(2)(iii)(B)(6) | not modelled as a deadline |
+| Expedited external review decision | 72 hours | the reviewer's receipt of the request | 45 CFR 147.136(d)(3)(iv) | not modelled as a deadline |
+| Deemed exhaustion | a plan that fails to strictly adhere to the rules may be treated as having exhausted its internal process | — | 45 CFR 147.136(b)(2)(ii)(F)(1) | the wording of the plan-response escalation |
 
-**Primary sources to cite in the README and video:**
+### Where the engine deliberately errs
 
-- 29 CFR § 2590.715-2719 — Internal claims and appeals and external review processes
-  (Department of Labor)
-- 45 CFR § 147.136 — the parallel HHS rule
-- 29 CFR § 2560.503-1 — ERISA claims procedure regulation, from which the 30/60 day and
-  72 hour decision windows derive
-- healthcare.gov, *Appealing a health plan decision*
-- CMS, *External Review* guidance
-
-> **Verification status: to be confirmed against the primary text before submission.**
-> Nothing in this table should be quoted publicly until each row has been checked against
-> the regulation itself rather than a secondary summary. The engine already treats these
-> as a floor, not as truth: a deadline stated in the notice always overrides them, and a
-> computed fallback is marked `regime_default` in the ledger so the interface can show
-> that it was inferred.
+- **The filing window** runs from receipt of the notice. When the receipt date is unknown
+  the engine uses the notice date, which is on or before receipt, so the computed deadline
+  can only be earlier than the true one.
+- **The plan's decision windows** run from the plan's receipt of the appeal. The engine
+  counts from the filing date the advocate records, which is on or before receipt, so the
+  computed date can only be earlier. The rule text shown beside the deadline says this.
 
 ### Why these are a floor and not the answer
 
-- States regulate insurance and many extend these windows. A state-law appeal window is
-  frequently longer than the federal minimum.
+- States regulate insurance and many extend these windows.
 - Individual plans may grant more time than they are required to.
-- Grandfathered plans, self-funded ERISA plans, Medicare Advantage, Medicaid managed care,
-  and non-health lines (auto, property) run different regimes entirely. Only the ACA
-  regimes above are modelled.
+- Grandfathered plans, Medicare Advantage, Medicaid managed care, and non-health lines run
+  different regimes. Only the ACA regimes above are modelled.
 
-This is the reason `denial.stated_appeal_deadline` exists as a field and takes precedence
-over every computation in the engine.
+This is why `denial.stated_appeal_deadline` exists as a field and takes precedence over
+every computation in the engine.
 
 ---
 
 ## Figures quoted in the README
 
-| Claim | Source to cite |
-|---|---|
-| ~19% of in-network claims denied on 2023 ACA marketplace plans; wide per-plan variation | KFF, *Claims Denials and Appeals in ACA Marketplace Plans* |
-| ~34% of internal appeals result in a reversal | KFF, same study |
-| Consumers prevail in ~45% of external reviews | KFF / CMS external review data |
-| Over 80% of appealed Medicare Advantage prior-authorization denials are overturned | HHS Office of Inspector General |
-| The large majority of denials are never appealed | KFF, same study |
-| ~$262bn in denied claims annually, a large share considered avoidable | Industry estimate — **weakest citation in the set** |
+| Claim | Figure | Source |
+|---|---|---|
+| In-network claims denied by HealthCare.gov insurers | about 19% (2024) | KFF, *Claims Denials and Appeals in ACA Marketplace Plans in 2024*, 24 March 2026 |
+| Range of in-network denial rates across insurers | 3% to 36% (2024) | same |
+| Denied in-network claims that consumers appealed | fewer than 1% (2024) | same |
+| Internal appeals where the insurer reversed its denial | 34% (insurers upheld 66%) (2024) | same |
+| Denials overturned by a state's independent external review | 655 of 1,353 eligible cases, about 48% (Pennsylvania, since 2024) | Pennsylvania Insurance Department, press release, 3 April 2026 |
+| Medicare Advantage prior authorization denials appealed, and overturned on appeal | 11.5% appealed; more than eight in ten of those overturned (2024) | KFF, *Medicare Advantage Insurers Made Nearly 53 Million Prior Authorization Determinations in 2024*, 28 January 2026 |
 
-> **Verification status: to be confirmed.** The dollar figure is an industry estimate
-> rather than a government statistic and should either be cited to its original publisher
-> with that framing made explicit, or dropped. A number that cannot survive a judge asking
-> "where is that from?" costs more than it adds.
+Earlier drafts quoted "~34% of internal appeals overturned" alongside the 2023 denial rate,
+"consumers prevail in ~45% of external reviews", and attributed the Medicare Advantage
+figure to the HHS Office of Inspector General. Checking them showed the 34% is the 2024
+figure (2023 was 44%), the 45% has no primary source we could find — KFF reports that
+external appeal outcomes could not be calculated from the public data — and the Medicare
+Advantage figure is KFF's analysis of CMS data. Those claims were corrected rather than
+kept.
+
+### Considered and not used
+
+**"$262 billion in claims denied each year, 86% avoidable."** This comes from a Change
+Healthcare analysis (2017) of claims submitted by *hospitals* in 2016, and describes
+provider billing denials rather than denials faced by patients. It is not evidence about
+the problem Overturn addresses, so it is not quoted.
 
 ---
 
@@ -77,7 +81,7 @@ over every computation in the engine.
 
 **Every document in the evaluation corpus is synthetic.** An earlier draft of this file
 described a mix of adapted public templates and synthetic letters; that mix was never
-built, and the description has been corrected rather than left standing.
+built, and the description was corrected rather than left standing.
 
 One of the four house styles follows the section structure of the federal model notice of
 adverse benefit determination. It borrows the structure only — no text from a real notice
@@ -92,22 +96,26 @@ letters is the most valuable single improvement available to the evaluation.
 ## Denial reason codes
 
 Rule packs recognise payer reason codes from the X12 Claim Adjustment Reason Code (CARC)
-list, published by X12 (x12.org). The codes the packs use:
+list (x12.org/codes/claim-adjustment-reason-codes), checked 2026-09-10:
 
-| Code | Meaning | Pack |
+| Code | X12 description | Pack |
 |---|---|---|
-| CO-50 | Not deemed a medical necessity by the payer | `medical_necessity` |
-| CO-197, CO-198 | Precertification or authorization absent, or exceeded | `prior_authorization` |
-| CO-15 | Authorization number missing, invalid or not applicable | `prior_authorization` |
-| CO-242 | Services not provided by network or primary care providers | `out_of_network` |
-| CO-4, CO-11, CO-16 | Modifier or diagnosis inconsistent with the procedure; claim lacks information or has billing errors | `coding_error` |
-| CO-55 | Procedure, treatment or drug deemed experimental or investigational | `experimental` |
+| CO-50 | These are non-covered services because this is not deemed a "medical necessity" by the payer | `medical_necessity` |
+| CO-197 | Precertification/authorization/notification/pre-treatment absent | `prior_authorization` |
+| CO-198 | Precertification/notification/authorization/pre-treatment exceeded | `prior_authorization` |
+| CO-242 | Services not provided by network/primary care providers | `out_of_network` |
+| CO-4 | The procedure code is inconsistent with the modifier used | `coding_error` |
+| CO-11 | The diagnosis is inconsistent with the procedure | `coding_error` |
+| CO-16 | Claim/service lacks information or has submission/billing error(s) | `coding_error` |
+| CO-55 | Procedure/treatment/drug is deemed experimental/investigational by the payer | `experimental` |
 
-The first version of the medical necessity pack also claimed CO-55 and CO-167. CO-55 is the
-experimental code and CO-167 means the diagnosis is not covered; neither is a medical
-necessity denial, and routing them there would have argued against a reason the plan did
-not give. Both were removed in `medical_necessity@1.1.0`.
+Corrections made while checking:
 
-> **Verification status: to be confirmed against the current CARC list before
-> submission.** Codes are revised by X12 on a schedule. Phrase matching does not depend on
-> them, so a stale code would fail to match rather than misclassify.
+- The first medical necessity pack also claimed CO-55 (experimental) and CO-167 (diagnosis
+  not covered). Neither is a medical necessity denial; routing them there would have argued
+  against a reason the plan did not give. Removed in `medical_necessity@1.1.0`.
+- The first prior authorization pack claimed CO-15, which X12 deactivated on 2018-05-01.
+  Removed in `prior_authorization@1.1.0`; a letter that still prints it is recognised by its
+  wording instead. Some corpus letters print CO-15 on purpose, to keep that path tested.
+- CO-22 (coordination of benefits) is recognised by no pack. Letters citing it are
+  reported as outside the installed categories.
