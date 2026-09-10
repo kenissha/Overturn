@@ -167,12 +167,19 @@ No numbers appear in this README before they are measured.*
 
 ### On the corpus, honestly
 
-An evaluation run entirely on documents we generated ourselves measures whether our
-extractor can read our own generator. That is circularity, not accuracy. So the corpus is
-mixed: denial letters adapted from publicly published templates and examples (CMS and
-state Departments of Insurance) alongside synthetic documents used to cover edge cases we
-could not find in public samples. The exact split, and the limitations of the synthetic
-portion, are stated in [docs/eval-results.md](docs/eval-results.md).
+**Every document in the evaluation corpus is synthetic.** That is a real limitation, and it
+is stated here rather than discovered by a reader.
+
+The risk with a synthetic corpus is circularity: measuring whether an extractor can read
+its own generator. The corpus is built to resist that. The generator shares no code with
+the extraction path; the answer key comes from the generator's inputs rather than from
+parsing its output; letters are rendered in four house styles, one following the
+structure of the federal model notice of adverse benefit determination; and surface forms
+vary independently of values, so the same date is printed four different ways.
+
+What that does not buy is the messiness of real letters. Scores here are an upper bound on
+real-world performance, not an estimate of it. Composition, calibration and the exact
+limitations are in [docs/eval-results.md](docs/eval-results.md).
 
 ---
 

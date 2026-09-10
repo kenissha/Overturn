@@ -75,15 +75,14 @@ over every computation in the engine.
 
 ## Corpus provenance
 
-The evaluation corpus mixes two kinds of document, and the split is reported in
-`docs/eval-results.md`:
+**Every document in the evaluation corpus is synthetic.** An earlier draft of this file
+described a mix of adapted public templates and synthetic letters; that mix was never
+built, and the description has been corrected rather than left standing.
 
-1. **Adapted from public examples.** Denial and appeal letter templates published by CMS
-   and by state Departments of Insurance, with identifying details replaced.
-2. **Synthetic.** Generated to cover edge cases not represented in public samples —
-   conflicting policy language, deadlines stated only implicitly, multiple stated denial
-   reasons, poor OCR.
+One of the four house styles follows the section structure of the federal model notice of
+adverse benefit determination. It borrows the structure only — no text from a real notice
+or a real insurer is used, and every insurer, provider and patient name is fictional.
 
-Evaluating only on documents we generated ourselves would measure whether the extractor
-can read its own generator. The mix exists to avoid that, and the limitation of the
-synthetic portion is stated rather than glossed over.
+How the corpus resists measuring an extractor against its own generator, and what it
+cannot account for, is set out in `docs/eval-results.md`. Adding redacted real denial
+letters is the most valuable single improvement available to the evaluation.
