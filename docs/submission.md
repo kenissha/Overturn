@@ -53,8 +53,14 @@ Overturn works an advocate's denial files in the background.
   local ledger before it is recorded.
 - **Deterministic engine**: Python and Pydantic — deadlines, five YAML rule packs,
   classification, evidence, anomaly detection, the escalation gate and argument planning.
+- **Cross-document checks**: plan documents are read for what they cover. When two
+  documents disagree, the ledger keeps both readings with their quotes as a conflict for
+  the advocate — often the strongest argument in the file — and a document never
+  overwrites what a person confirmed.
 - **Interface**: React and TypeScript over a thin FastAPI layer, with a background tick
   that re-evaluates every file every fifteen minutes.
+- **Tracing**: OpenTelemetry through Strands, one span per pipeline step, carrying
+  identifiers and counts and never a value from a document.
 - **Evaluation**: a synthetic corpus with an answer key, a harness calibrated before
   scoring, and a red-team suite that runs on every build.
 
@@ -97,7 +103,7 @@ box that says *the letter does not state this* is the part of the screen an advo
 ## Built with
 
 Python · Strands Agents · Amazon Bedrock · Amazon Bedrock AgentCore · Claude · Pydantic ·
-FastAPI · React · TypeScript · Vite
+FastAPI · React · TypeScript · Vite · OpenTelemetry
 
 ## Links
 
