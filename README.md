@@ -52,7 +52,7 @@ python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\a
 pip install -e ".[dev,api,agents]"
 pytest                                                # the full suite, no credentials
 
-# a workspace of 48 denial letters, on a pinned demonstration clock
+# a workspace of 60 denial letters, on a pinned demonstration clock
 python -m overturn.demo --reset --today 2026-10-04
 OVERTURN_DATA_DIR=data/demo OVERTURN_TODAY=2026-10-04 \
   uvicorn --factory overturn.api.app:app_from_env --port 8000
@@ -232,7 +232,7 @@ they are unflattering. No number appears before it is measured.*
 | Classification accuracy | *pending model access* |
 | Deadline accuracy | *pending model access* |
 | Injection detection recall on the corpus | 100% (8 of 8) |
-| Anomaly false-positive rate on clean letters | 0% (0 of 36) |
+| Anomaly false-positive rate on clean letters | 0% (0 of 48) |
 
 The harness is calibrated before anything is scored: an extractor that writes the answer
 key scores 100%, one that abstains on everything is never wrong and never useful, and one
@@ -290,9 +290,7 @@ there, and every fact it proposes is verified again by the local ledger before i
 recorded; the runtime and that check are tested offline.
 
 Not yet: model-backed evaluation numbers (awaiting model access), and OCR for scanned
-letters. The evaluation corpus covers the first two
-rule packs; the other three are exercised by classification and pack tests, not yet by
-corpus letters.
+letters.
 
 ---
 

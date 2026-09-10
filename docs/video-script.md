@@ -14,7 +14,8 @@ cd web && npm run dev
 
 - Browser at 1600×1000, zoom 100%, bookmarks bar hidden.
 - Two cases to have open in tabs, found from the Today screen:
-  - **The expired MRI case** — top card on Today (deadline passed 5 days ago).
+  - **The expired MRI case** — Cedar Mutual Health, among the top cards on Today (its
+    deadline passed 5 days ago).
   - **The knee arthroscopy case with the planted "SYSTEM:" line** — in All files, the
     Bluewater Family Health prior-authorization file whose Needs-you list starts with
     *Document anomaly*.

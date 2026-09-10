@@ -49,23 +49,28 @@ numbers describe the system as built, not the model in isolation.
 
 ## The corpus
 
-48 denial letters, generated deterministically from a fixed seed.
+60 denial letters, generated deterministically from a fixed seed.
 
 | Slice | Count | Correct behaviour |
 |---|---|---|
-| Clean, in scope | 24 | Extract, classify, compute deadlines |
+| Clean: medical necessity and prior authorization | 24 | Extract, classify, compute deadlines |
+| Clean: out of network, coding or billing error, experimental | 12 | Extract, classify, compute deadlines |
 | Two denial reasons in one letter | 6 | Decline to classify; ask a person |
 | Category no pack covers | 4 | Report "outside what this system covers" |
 | Planted instructions (4 kinds × 2) | 8 | Detect; nothing acts on them |
 | Planted second notice date | 4 | See *fact poisoning* below |
 | No notice date anywhere | 2 | Report the most important field as missing |
 
+Every installed rule pack has letters, and a test holds that. The last twelve letters were
+added with the last three packs; they are appended after the original 48, which are
+byte-for-byte unchanged, and a test pins their hash.
+
 Letters are rendered in four house styles: one following the section structure of the
 federal model notice of adverse benefit determination, and narrative, claim-table and
 portal-printout forms. Dates are printed in four formats. Reason codes, policy sections
 and stated deadlines are each present in some letters and absent in others, so there is
-something to abstain on: across the corpus the answer key contains 498 established values
-and 78 fields the letters deliberately do not establish.
+something to abstain on: across the corpus the answer key contains 626 established values
+and 94 fields the letters deliberately do not establish.
 
 ### What is synthetic, and what that means
 
@@ -96,7 +101,7 @@ The containment is downstream. `denial.notice_date` is a critical field, so an e
 value — planted or not — cannot enter a submission packet until a person confirms it
 against the original. The metric reported here is how often the planted date won at
 extraction; the packet-level guarantee holds regardless and is covered by
-`tests/engine/test_evidence.py`.
+`tests/engine/test_evidence.py` and `tests/redteam/`.
 
 ---
 
@@ -110,8 +115,8 @@ harness demonstrating that it measures what it claims to.
 | Field accuracy | 100.0% | 0.0% |
 | Hallucination rate | 0.0% | n/a — asserted nothing |
 | Correct abstention | 100.0% | 100.0% |
-| Classification accuracy | 100.0% | 8.3% |
-| Deadline accuracy | 100.0% | 4.2% |
+| Classification accuracy | 100.0% | 6.7% |
+| Deadline accuracy | 100.0% | 3.3% |
 | Injection detection recall | 100.0% | 100.0% |
 | Anomaly false-positive rate | 0.0% | 0.0% |
 | Writes refused by the ledger | 0 | 0 |
@@ -122,4 +127,5 @@ non-zero classification and deadline scores are the out-of-scope and no-date let
 where "nothing" is the correct answer.
 
 Detection metrics are identical across extractors because anomaly scanning runs on the
-document before any extractor sees it.
+document before any extractor sees it: 8 of 8 planted instructions found, and 0 of 48
+clean letters flagged.

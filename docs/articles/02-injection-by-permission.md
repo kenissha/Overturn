@@ -87,7 +87,7 @@ Detection is not the security boundary. A pattern list can be paraphrased around
 nothing relies on it. Its job is to make an attempt visible. That makes false positives
 expensive: a detector that fires on ordinary insurer prose teaches people to ignore it. So
 the false-positive test matters as much as the attack tests. On our corpus it flags 8 of 8
-planted instructions and 0 of 36 clean letters.
+planted instructions and 0 of 48 clean letters.
 
 ## What this does not stop
 

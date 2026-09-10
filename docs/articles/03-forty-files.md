@@ -70,7 +70,7 @@ count has to be right.
 
 ## What a realistic workspace found
 
-We wrote a demo seed that opens all 48 letters of our evaluation corpus as cases, then
+We wrote a demo seed that opens every letter of our evaluation corpus as a case, then
 advances most of them as a person would — confirming facts, marking documents on file,
 recording some as filed. It exists so the interface can be shown. It found three real bugs
 that a few hundred unit tests had not:
