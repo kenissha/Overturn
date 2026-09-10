@@ -12,17 +12,26 @@ interface Props {
   onFocus: (field: string | null) => void;
 }
 
+// What to read first. A tampered document changes how everything else on the file should
+// be read, and a clock can end the file; the rest can wait a few seconds longer.
+const READING_ORDER: Record<number, number> = { 4: 0, 3: 1, 1: 2, 2: 3 };
+
 // Screen 4. The only place the system speaks to the advocate, and only for one of four
 // reasons. Every question says why it is worth their attention. There is no chat: the
 // agent asks, the person answers, and the answer lands in the ledger.
 export function Escalations({ escalations, silent, ledger, busy, onAnswer, onCorrect, onFocus }: Props) {
+  const ordered = [...escalations].sort(
+    (a, b) =>
+      READING_ORDER[a.trigger] - READING_ORDER[b.trigger] || Number(b.blocking) - Number(a.blocking),
+  );
+
   return (
     <aside className="escalations">
       <h2>
         Needs you <span className="count">{escalations.length}</span>
       </h2>
       {escalations.length === 0 && <p className="muted">Nothing on this file needs you right now.</p>}
-      {escalations.map((e) => (
+      {ordered.map((e) => (
         <EscalationCard
           key={e.id}
           escalation={e}
@@ -35,9 +44,7 @@ export function Escalations({ escalations, silent, ledger, busy, onAnswer, onCor
       ))}
       {silent.length > 0 && (
         <details className="silent">
-          <summary>
-            {silent.length} noted without interrupting you
-          </summary>
+          <summary>{silent.length} noted without interrupting you</summary>
           <ul>
             {silent.map((line, i) => (
               <li key={i}>{line}</li>

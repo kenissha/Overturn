@@ -23,10 +23,21 @@ interface Mark {
   anomaly?: Anomaly;
 }
 
+const ANOMALY_TITLE: Record<string, string> = {
+  instruction_pattern: "Text addressed to an automated reader",
+  role_impersonation: "Text imitating a system message",
+  suppression_request: "A request to keep something from you",
+  hidden_text: "Hidden characters removed",
+  low_ocr_confidence: "Poorly scanned document",
+};
+
+const anomalyId = (a: Anomaly) => `anomaly-${a.doc_id}-${a.page ?? 0}-${a.char_span?.[0] ?? 0}`;
+
 // The left half of the split view: the letter exactly as the engine read it. Every
 // highlight is a character span a ledger fact points at, so what lights up is precisely
 // the text that justifies the value on the right — nothing inferred, nothing approximate.
-export function DocumentPane({ document, spans, active, onHover }: Props) {
+// Anything anomalous is announced at the top and marked where it sits on the page.
+export function DocumentPane({ document: doc, spans, active, onHover }: Props) {
   const activeRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -35,31 +46,53 @@ export function DocumentPane({ document, spans, active, onHover }: Props) {
 
   const pages = useMemo(
     () =>
-      document.pages.map((text, i) => {
+      doc.pages.map((text, i) => {
         const page = i + 1;
         const marks: Mark[] = [
           ...spans
-            .filter((s) => s.doc_id === document.doc_id && s.page === page)
+            .filter((s) => s.doc_id === doc.doc_id && s.page === page)
             .map((s) => ({ start: s.start, end: s.end, key: s.key })),
-          ...document.anomalies
+          ...doc.anomalies
             .filter((a) => a.page === page && a.char_span)
             .map((a) => ({ start: a.char_span![0], end: a.char_span![1], anomaly: a })),
         ];
         return { page, segments: segment(text, marks) };
       }),
-    [document, spans],
+    [doc, spans],
   );
 
-  const hidden = document.anomalies.filter((a) => a.kind === "hidden_text");
   let firstActiveSeen = false;
+  const anchored = new Set<string>();
 
   return (
     <div className="document">
-      {hidden.map((a, i) => (
-        <div key={i} className="anomaly-banner">
-          <strong>Hidden text removed from page {a.page}.</strong> {a.excerpt}. {a.explanation}
+      {doc.anomalies.length > 0 && (
+        <div className="anomalies">
+          {doc.anomalies.map((a, i) => (
+            <div key={i} className={`anomaly-banner sev-${a.severity}`}>
+              <div>
+                <strong>{ANOMALY_TITLE[a.kind] ?? "Unexpected content"}</strong>
+                {a.page ? ` · page ${a.page}` : ""}
+              </div>
+              <div className="small">{a.explanation} Nothing acted on it.</div>
+              {a.char_span ? (
+                <button
+                  className="quiet-btn"
+                  onClick={() =>
+                    document
+                      .getElementById(anomalyId(a))
+                      ?.scrollIntoView({ block: "center", behavior: "smooth" })
+                  }
+                >
+                  Show it on the page
+                </button>
+              ) : (
+                <div className="mono small muted">{a.excerpt}</div>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
       {pages.map(({ page, segments }) => (
         <section key={page} className="page">
           <div className="page-label">Page {page}</div>
@@ -69,6 +102,9 @@ export function DocumentPane({ document, spans, active, onHover }: Props) {
               const isActive = active !== null && seg.keys.includes(active);
               const setRef = isActive && !firstActiveSeen;
               if (setRef) firstActiveSeen = true;
+              const aid = seg.anomaly ? anomalyId(seg.anomaly) : undefined;
+              const giveId = aid !== undefined && !anchored.has(aid);
+              if (giveId) anchored.add(aid);
               const cls = [
                 seg.keys.length ? "src" : "",
                 isActive ? "active" : "",
@@ -77,6 +113,7 @@ export function DocumentPane({ document, spans, active, onHover }: Props) {
               return (
                 <mark
                   key={j}
+                  id={giveId ? aid : undefined}
                   ref={setRef ? (el) => void (activeRef.current = el) : undefined}
                   className={cls}
                   title={seg.anomaly ? seg.anomaly.explanation : undefined}

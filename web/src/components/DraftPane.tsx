@@ -35,6 +35,9 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
   }
 
   const missingDocs = [...readiness.missing_blocking, ...readiness.missing_optional];
+  const evidenceLabel = new Map(
+    [...readiness.present, ...missingDocs].map((item) => [item.id, item.label] as const),
+  );
   const filed = ["SUBMITTED", "AWAITING_RESPONSE", "DECISION"].includes(data.state);
 
   return (
@@ -51,14 +54,18 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
                 <span
                   key={c.field}
                   className={`cite s-${c.status}`}
-                  title={c.provenance?.quote ? `“${c.provenance.quote}” — page ${c.provenance.page}` : "Stated by a person"}
+                  title={
+                    c.provenance?.quote
+                      ? `“${c.provenance.quote}” — page ${c.provenance.page}`
+                      : "Stated by a person"
+                  }
                 >
                   {fieldLabel(c.field)}
                 </span>
               ))}
               {p.evidence.map((ev) => (
                 <span key={ev} className="cite evidence">
-                  encl. {ev.replace(/_/g, " ")}
+                  encl. {evidenceLabel.get(ev) ?? ev}
                 </span>
               ))}
               {p.rests_on_unverified && (
@@ -71,7 +78,18 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
           .filter((o) => o.is_gap)
           .map((o) => (
             <div key={o.step_id} className="para omitted">
-              <p>Not written: {o.reason}</p>
+              <p>
+                <strong>Not written.</strong>{" "}
+                {o.missing_facts.length > 0 && (
+                  <>The letter does not establish: {o.missing_facts.map(fieldLabel).join(", ")}. </>
+                )}
+                {o.missing_evidence.length > 0 && (
+                  <>
+                    Not on file:{" "}
+                    {o.missing_evidence.map((id) => evidenceLabel.get(id) ?? id).join("; ")}.
+                  </>
+                )}
+              </p>
             </div>
           ))}
       </div>
@@ -90,15 +108,16 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
           <ul className="docs">
             {readiness.present.map((i) => (
               <li key={i.id} className="present">
-                {i.label}
+                <span className="tag ok">on file</span>
+                <span>{i.label}</span>
               </li>
             ))}
             {missingDocs.map((i) => (
               <li key={i.id} className={i.blocking ? "missing blocking" : "missing"}>
+                <span className="tag">{i.blocking ? "needed" : "optional"}</span>
                 <span>
                   {i.label}
                   {i.human_only && <span className="muted small"> · only you can obtain this</span>}
-                  {!i.blocking && <span className="muted small"> · strengthens, not required</span>}
                 </span>
                 <button className="quiet-btn" disabled={busy} onClick={() => onEvidence(i.id)}>
                   Mark on file

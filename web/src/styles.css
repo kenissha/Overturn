@@ -226,3 +226,17 @@ table.audit tbody tr { cursor: default; }
 .strip-row.met .bar { background: var(--line-strong); }
 .strip-row.met .tick.due { background: var(--line-strong); }
 .strip-met { color: var(--ok); font-weight: 600; }
+
+/* anomalies announced at the head of a document, before anything is read */
+.anomalies { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 0; }
+.anomaly-banner { margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.anomaly-banner.sev-warn { border-left-color: var(--urgent); background: #fdf6ee; }
+.anomaly-banner .quiet-btn { align-self: flex-start; padding-left: 0; }
+
+/* documents in the packet */
+.docs li { display: grid; grid-template-columns: 62px 1fr auto; gap: 8px; align-items: baseline; }
+.docs li.present::before { content: none; }
+.docs .tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.docs .tag.ok { color: var(--ok); }
+.docs button { white-space: nowrap; }
+.para.omitted strong { color: var(--ink-2); font-weight: 600; }
