@@ -136,6 +136,7 @@ export function CaseView({
           busy={busy}
           onEvidence={(id) => act(() => api.attachEvidence(caseId, id))}
           onFiled={(d) => act(() => api.markFiled(caseId, d))}
+          onDecision={(outcome, d) => act(() => api.decision(caseId, outcome, d))}
         />
       ) : tab === "trace" ? (
         <TracePane data={data} />

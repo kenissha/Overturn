@@ -64,6 +64,16 @@ PERSON_ONLY_STATES = frozenset(
 )
 """States only a person moves a case into. The pipeline reads them and never sets them."""
 
+AWAITING_DECISION = frozenset(
+    {
+        CaseState.SUBMITTED,
+        CaseState.AWAITING_RESPONSE,
+        CaseState.DECISION,
+        CaseState.EXTERNAL_REVIEW,
+    }
+)
+"""States in which an appeal has gone out and a decision can be recorded."""
+
 
 @dataclass(frozen=True, slots=True)
 class CaseSnapshot:
@@ -290,19 +300,74 @@ class Pipeline:
     ) -> CaseSnapshot:
         """Record that a person filed the appeal. Overturn itself never submits anything."""
         case = self.store.load(case_id)
-        if case.state in PERSON_ONLY_STATES:
+        if case.state is CaseState.EXTERNAL_REVIEW_ELIGIBLE:
+            field, target, what = (
+                "appeal.external_review_filed_date",
+                CaseState.EXTERNAL_REVIEW,
+                "External review request",
+            )
+        elif case.state in PERSON_ONLY_STATES:
             raise ValueError(f"{case_id} is already {case.state.value}")
-        case.facts["appeal.filed_date"] = _human_answer("appeal.filed_date", filed_on, by)
+        else:
+            field, target, what = "appeal.filed_date", CaseState.SUBMITTED, "Appeal"
+        case.facts[field] = _human_answer(field, filed_on, by)
         case.history.append(
             StateTransition(
                 from_state=case.state,
-                to_state=CaseState.SUBMITTED,
+                to_state=target,
                 by=by,
-                reason=f"Filed by {by} from state {case.state.value}. Overturn does not "
-                "submit appeals.",
+                reason=f"{what} filed by {by} from state {case.state.value}. Overturn "
+                "does not submit anything.",
             )
         )
-        case.state = CaseState.SUBMITTED
+        case.state = target
+        self.store.save(case)
+        return self.evaluate(case_id, today=today)
+
+    def record_decision(
+        self,
+        case_id: str,
+        outcome: str,
+        decided_on: date,
+        *,
+        by: str,
+        today: date | None = None,
+    ) -> CaseSnapshot:
+        """Record a decision on the appeal, as the advocate received it.
+
+        Overturned resolves the file. An upheld internal appeal is a final internal adverse
+        determination: the case becomes eligible for external review, whose clock runs from
+        the date of the decision. An upheld external review resolves the file.
+        """
+        if outcome not in ("overturned", "upheld"):
+            raise ValueError("outcome must be 'overturned' or 'upheld'")
+        case = self.store.load(case_id)
+        if case.state not in AWAITING_DECISION:
+            raise ValueError(
+                f"{case_id} has no appeal awaiting a decision; it is {case.state.value}"
+            )
+        external = case.state is CaseState.EXTERNAL_REVIEW
+        if outcome == "overturned":
+            target = CaseState.RESOLVED_OVERTURNED
+        elif external:
+            target = CaseState.RESOLVED_UPHELD
+        else:
+            target = CaseState.EXTERNAL_REVIEW_ELIGIBLE
+            case.facts["appeal.decision_date"] = _human_answer(
+                "appeal.decision_date", decided_on, by
+            )
+            case.facts["denial.is_final"] = _human_answer("denial.is_final", True, by)
+        case.facts["appeal.outcome"] = _human_answer("appeal.outcome", outcome, by)
+        stage = "external review" if external else "internal appeal"
+        case.history.append(
+            StateTransition(
+                from_state=case.state,
+                to_state=target,
+                by=by,
+                reason=f"The {stage} was {outcome}, decided {decided_on.isoformat()}.",
+            )
+        )
+        case.state = target
         self.store.save(case)
         return self.evaluate(case_id, today=today)
 
@@ -310,8 +375,19 @@ class Pipeline:
 
     def _apply(self, case: Case, escalation: Escalation, answer: str, by: str) -> None:
         """Turn an answer into ledger state, where the answer settles something."""
+        if escalation.trigger is Trigger.DEADLINE_PRESSURE and answer == "Close the case":
+            case.history.append(
+                StateTransition(
+                    from_state=case.state,
+                    to_state=CaseState.CLOSED_DEADLINE_MISSED,
+                    by=by,
+                    reason="Closed by a person after the filing window passed.",
+                )
+            )
+            case.state = CaseState.CLOSED_DEADLINE_MISSED
+            return
         if escalation.trigger is not Trigger.HUMAN_JUDGMENT:
-            return  # deadline and anomaly answers are recorded, not applied
+            return  # other deadline and anomaly answers are recorded, not applied
 
         if escalation.subject == "classification":
             chosen = next((p for p in self.registry if p.display_name == answer), None)

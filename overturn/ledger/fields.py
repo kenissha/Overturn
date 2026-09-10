@@ -192,6 +192,22 @@ _SPECS: tuple[FieldSpec, ...] = (
         "Overturn never submits anything itself. Starts the plan's response clock.",
         critical=True,
     ),
+    _f(
+        "appeal.decision_date",
+        FactKind.DATE,
+        _H,
+        "Date of the decision on the appeal, as the advocate received it. When an "
+        "internal appeal is upheld it starts the external review clock.",
+        critical=True,
+    ),
+    _f("appeal.outcome", FactKind.STRING, _H, "overturned or upheld, as a person recorded it"),
+    _f(
+        "appeal.external_review_filed_date",
+        FactKind.DATE,
+        _H,
+        "Date the advocate requested external review. Starts the reviewer's clock.",
+        critical=True,
+    ),
     # --- deadlines (engine only) -------------------------------------------------
     _f(
         "deadline.internal_appeal_due",

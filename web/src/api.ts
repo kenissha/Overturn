@@ -269,6 +269,8 @@ export const api = {
     }),
   attachEvidence: (id: string, evidenceId: string) =>
     request<Case>(`/api/cases/${id}/evidence/${evidenceId}`, post()),
+  decision: (id: string, outcome: "overturned" | "upheld", decidedOn: string) =>
+    request<Case>(`/api/cases/${id}/decision`, post({ outcome, decided_on: decidedOn })),
   markFiled: (id: string, filedOn: string) =>
     request<Case>(`/api/cases/${id}/filed`, post({ filed_on: filedOn })),
   letter: (id: string) => request<{ text: string; gaps: number }>(`/api/cases/${id}/letter`),

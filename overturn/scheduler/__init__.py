@@ -23,6 +23,7 @@ from pathlib import Path
 
 from overturn.ledger.schema import CaseState
 from overturn.pipeline import Pipeline
+from overturn.retention import purge_finished
 
 DEFAULT_INTERVAL_SECONDS = 15 * 60
 
@@ -45,17 +46,26 @@ class TickReport:
     open_questions: int = 0
     new_questions: list[tuple[str, str]] = field(default_factory=list)
     """(case_id, question) for every escalation not seen on an earlier tick."""
+    purged: int = 0
 
     def summary(self) -> str:
         return (
             f"{self.on.isoformat()}: {self.cases} open files, {self.documents_read} documents "
             f"read, {self.open_questions} open questions, {len(self.new_questions)} new"
+            + (f", {self.purged} finished files removed" if self.purged else "")
         )
 
 
 class Scheduler:
-    def __init__(self, pipeline: Pipeline, state_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        pipeline: Pipeline,
+        state_path: Path | None = None,
+        *,
+        retention_days: int | None = None,
+    ) -> None:
         self.pipeline = pipeline
+        self.retention_days = retention_days
         self.state_path = state_path or Path(pipeline.store.root) / "scheduler.json"
 
     def tick(self, *, today: date | None = None) -> TickReport:
@@ -77,6 +87,9 @@ class Scheduler:
                     report.new_questions.append((case_id, escalation.question))
 
         report.open_questions = len(current)
+        if self.retention_days is not None:
+            purged = purge_finished(self.pipeline.store, older_than_days=self.retention_days)
+            report.purged = len(purged.purged)
         self._remember(seen | current)
         return report
 

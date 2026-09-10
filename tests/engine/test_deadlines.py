@@ -304,3 +304,44 @@ def test_a_stated_deadline_still_records_when_its_window_opened():
     assert due.basis is Basis.STATED_IN_LETTER
     assert due.anchor_field == "denial.received_date"
     assert due.anchor_date == date(2026, 8, 1)
+
+
+def _human(case, field, value):
+    case.facts[field] = Fact(
+        field=field,
+        value=value,
+        status=FactStatus.HUMAN_ANSWERED,
+        verified_by="user_004",
+        recorded_by="user_004",
+    )
+
+
+def test_after_an_upheld_appeal_external_review_runs_from_the_decision():
+    """Not from the original notice: four months from receipt of the final decision."""
+    case = case_with(
+        denial__received_date="2026-08-01",
+        denial__stated_appeal_deadline="2026-10-15",
+        service__is_pre_service=False,
+    )
+    _human(case, "appeal.filed_date", "2026-09-01")
+    _human(case, "appeal.decision_date", "2026-10-20")
+    _human(case, "denial.is_final", True)
+
+    result = compute_deadlines(case)
+    due = result.get("deadline.external_review_due")
+    assert due.due == date(2027, 2, 20)
+    assert due.anchor_field == "appeal.decision_date"
+    assert due.basis is Basis.REGIME_DEFAULT  # the letter's date was for the internal appeal
+    assert due.met_on is None  # the internal filing does not meet the external window
+
+
+def test_requesting_external_review_meets_that_window_and_starts_the_reviewers_clock():
+    case = case_with(denial__received_date="2026-08-01", service__is_pre_service=False)
+    _human(case, "appeal.filed_date", "2026-09-01")
+    _human(case, "appeal.decision_date", "2026-10-20")
+    _human(case, "denial.is_final", True)
+    _human(case, "appeal.external_review_filed_date", "2026-11-02")
+
+    result = compute_deadlines(case)
+    assert result.get("deadline.external_review_due").met_on == date(2026, 11, 2)
+    assert result.get("deadline.plan_response_due").due == date(2026, 12, 17)  # 45 days

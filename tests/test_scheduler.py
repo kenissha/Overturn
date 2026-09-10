@@ -82,3 +82,19 @@ def test_what_has_been_surfaced_survives_a_restart(pipeline, corpus):
     open_letter(pipeline, corpus)
     Scheduler(pipeline).tick(today=TODAY)
     assert Scheduler(pipeline).tick(today=TODAY).new_questions == []
+
+
+def test_the_tick_applies_retention_to_finished_files_only(pipeline, corpus):
+    from overturn.ledger.schema import CaseState, utcnow
+
+    open_letter(pipeline, corpus)
+    finished = pipeline.store.create()
+    finished.state = CaseState.RESOLVED_OVERTURNED
+    finished.updated_at = utcnow().replace(year=utcnow().year - 1)
+    pipeline.store.path_for(finished.case_id).write_text(
+        finished.model_dump_json(), encoding="utf-8"
+    )
+
+    report = Scheduler(pipeline, retention_days=30).tick(today=TODAY)
+    assert report.purged == 1
+    assert len(pipeline.store.list_case_ids()) == 1

@@ -79,8 +79,14 @@ REGIMES: dict[Regime, RegimeSpec] = {
     ),
 }
 
-FILING_DEADLINES = frozenset({"deadline.internal_appeal_due", "deadline.external_review_due"})
-"""Windows the advocate files within. Once a filing is recorded they are met."""
+FILED_BY = {
+    "deadline.internal_appeal_due": "appeal.filed_date",
+    "deadline.external_review_due": "appeal.external_review_filed_date",
+}
+"""Windows the advocate files within, and the fact recording each filing. Once that
+fact is recorded, the window is met."""
+
+FILING_DEADLINES = frozenset(FILED_BY)
 
 INTERNAL_FILING_DAYS = 180
 """Identical across every internal regime, which is why the filing deadline can be
@@ -289,9 +295,24 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
         )
 
     is_external = regime is Regime.ACA_EXTERNAL
+    decided = _as_date(case.value("appeal.decision_date"))
+    if is_external and decided is not None:
+        # The internal appeal has been decided. External review runs from receipt of that
+        # decision, and any deadline printed in the original notice was for the internal
+        # appeal, not for this.
+        anchor = Anchor(
+            field="appeal.decision_date",
+            on=decided,
+            estimated=False,
+            note="date of the final internal decision",
+        )
 
     # --- filing deadline -------------------------------------------------------
-    stated = _as_date(case.value("denial.stated_appeal_deadline"))
+    stated = (
+        None
+        if is_external and decided is not None
+        else _as_date(case.value("denial.stated_appeal_deadline"))
+    )
     filing_field = "deadline.external_review_due" if is_external else "deadline.internal_appeal_due"
 
     if stated is not None:
@@ -353,12 +374,15 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
     else:
         spec = REGIMES[regime]
         if spec.plan_responds_within_days is not None:
-            filed = _as_date(case.value("appeal.filed_date"))
+            filed_field = (
+                "appeal.external_review_filed_date" if is_external else ("appeal.filed_date")
+            )
+            filed = _as_date(case.value(filed_field))
             if filed is None:
                 blocked.append(
                     BlockedDeadline(
                         field="deadline.plan_response_due",
-                        missing_fields=("appeal.filed_date",),
+                        missing_fields=(filed_field,),
                         explanation=(
                             f"The plan has {spec.plan_responds_within_days} days to "
                             "respond once the appeal is filed. The clock starts on the "
@@ -373,7 +397,7 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
                         due=filed + timedelta(days=spec.plan_responds_within_days),
                         basis=Basis.REGIME_DEFAULT,
                         regime=regime,
-                        anchor_field="appeal.filed_date",
+                        anchor_field=filed_field,
                         anchor_date=filed,
                         anchor_is_estimated=False,
                         rule=f"{spec.plan_responds_within_days} days from the plan's receipt "
@@ -394,11 +418,8 @@ def compute_deadlines(case: Case) -> DeadlineComputation:
                 )
             )
 
-    filed = _as_date(case.value("appeal.filed_date"))
-    if filed is not None:
-        deadlines = [
-            replace(d, met_on=filed) if d.field in FILING_DEADLINES else d for d in deadlines
-        ]
+    met = {name: _as_date(case.value(source)) for name, source in FILED_BY.items()}
+    deadlines = [replace(d, met_on=met[d.field]) if met.get(d.field) else d for d in deadlines]
 
     return DeadlineComputation(
         deadlines=tuple(deadlines),

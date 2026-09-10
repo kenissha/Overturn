@@ -45,7 +45,9 @@ def main(argv: list[str] | None = None) -> int:
     pipeline = Pipeline(
         CaseStore(args.data), PackRegistry.from_directory(ROOT / "packs"), extractor
     )
-    scheduler = Scheduler(pipeline)
+    from overturn.retention import retention_days_from_env
+
+    scheduler = Scheduler(pipeline, retention_days=retention_days_from_env())
     fixed = os.environ.get("OVERTURN_TODAY")
 
     if args.once:

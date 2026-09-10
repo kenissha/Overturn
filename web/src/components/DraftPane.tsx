@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { api, type Case } from "../api";
-import { fieldLabel } from "../format";
+import { fieldLabel, STATE_LABEL } from "../format";
 
 interface Props {
   data: Case;
   busy: boolean;
   onEvidence: (evidenceId: string) => void;
   onFiled: (date: string) => void;
+  onDecision: (outcome: "overturned" | "upheld", decidedOn: string) => void;
 }
+
+const AWAITING_DECISION = ["SUBMITTED", "AWAITING_RESPONSE", "DECISION", "EXTERNAL_REVIEW"];
+const FINISHED = ["RESOLVED_OVERTURNED", "RESOLVED_UPHELD", "CLOSED_DEADLINE_MISSED"];
 
 // The appeal as the ledger entitles it to be written. Each paragraph shows the facts it
 // rests on; each paragraph that could not be written says what is missing. The letter is
 // assembled by the engine from the rule pack — no model wrote a sentence of it.
-export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
+export function DraftPane({ data, busy, onEvidence, onFiled, onDecision }: Props) {
   const [copied, setCopied] = useState(false);
   const [filedOn, setFiledOn] = useState("");
+  const [decidedOn, setDecidedOn] = useState("");
   const plan = data.plan;
   const readiness = data.readiness;
 
@@ -38,7 +43,7 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
   const evidenceLabel = new Map(
     [...readiness.present, ...missingDocs].map((item) => [item.id, item.label] as const),
   );
-  const filed = ["SUBMITTED", "AWAITING_RESPONSE", "DECISION"].includes(data.state);
+  const externalNext = data.state === "EXTERNAL_REVIEW_ELIGIBLE";
 
   return (
     <div className="draft">
@@ -127,11 +132,31 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
           </ul>
         </section>
 
-        <section>
-          <h3>Filing</h3>
-          {filed ? (
-            <p>Recorded as filed.</p>
-          ) : (
+        {FINISHED.includes(data.state) ? (
+          <section>
+            <h3>Outcome</h3>
+            <p>{STATE_LABEL[data.state] ?? data.state}. This file is finished.</p>
+          </section>
+        ) : AWAITING_DECISION.includes(data.state) ? (
+          <section>
+            <h3>Decision</h3>
+            <p className="muted small">
+              Record the decision when you receive it.
+              {data.state !== "EXTERNAL_REVIEW" && " An upheld internal appeal opens external review."}
+            </p>
+            <div className="value-form">
+              <input type="date" value={decidedOn} onChange={(e) => setDecidedOn(e.target.value)} />
+              <button disabled={busy || !decidedOn} onClick={() => onDecision("overturned", decidedOn)}>
+                Overturned
+              </button>
+              <button disabled={busy || !decidedOn} onClick={() => onDecision("upheld", decidedOn)}>
+                Upheld
+              </button>
+            </div>
+          </section>
+        ) : (
+          <section>
+            <h3>{externalNext ? "External review" : "Filing"}</h3>
             <form
               className="value-form"
               onSubmit={(e) => {
@@ -141,14 +166,16 @@ export function DraftPane({ data, busy, onEvidence, onFiled }: Props) {
             >
               <input type="date" value={filedOn} onChange={(e) => setFiledOn(e.target.value)} />
               <button type="submit" disabled={busy || !filedOn}>
-                Record as filed
+                {externalNext ? "Record external review request" : "Record as filed"}
               </button>
               <span className="muted small">
-                A record that you sent it. Starts the plan's response clock.
+                {externalNext
+                  ? "A record that you requested external review. Starts the reviewer's clock."
+                  : "A record that you sent it. Starts the plan's response clock."}
               </span>
             </form>
-          )}
-        </section>
+          </section>
+        )}
       </aside>
     </div>
   );

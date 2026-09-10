@@ -242,3 +242,58 @@ def test_an_anomaly_names_the_document_as_the_advocate_knows_it(pipeline, corpus
     asked = pipeline.process(case_id, today=TODAY).gate.by_trigger(Trigger.DOCUMENT_ANOMALY)
     assert f"{sample.sample_id}.txt" in asked[0].question
     assert sample.doc_id not in asked[0].question
+
+
+# --- after the appeal goes out ------------------------------------------------------------
+
+
+def filed_case(pipeline, corpus) -> str:
+    case_id = open_with(pipeline, medical_necessity_letter(corpus))
+    pipeline.process(case_id, today=TODAY)
+    pipeline.mark_filed(case_id, date(2026, 9, 12), by=ADVOCATE, today=TODAY)
+    return case_id
+
+
+def test_an_overturned_appeal_resolves_the_file(pipeline, corpus):
+    case_id = filed_case(pipeline, corpus)
+    snapshot = pipeline.record_decision(
+        case_id, "overturned", date(2026, 10, 1), by=ADVOCATE, today=TODAY
+    )
+    assert snapshot.case.state is CaseState.RESOLVED_OVERTURNED
+
+
+def test_an_upheld_appeal_opens_external_review_on_its_own_clock(pipeline, corpus):
+    case_id = filed_case(pipeline, corpus)
+    snapshot = pipeline.record_decision(
+        case_id, "upheld", date(2026, 10, 1), by=ADVOCATE, today=TODAY
+    )
+    assert snapshot.case.state is CaseState.EXTERNAL_REVIEW_ELIGIBLE
+    assert snapshot.deadlines.get("deadline.external_review_due").due == date(2027, 2, 1)
+
+    snapshot = pipeline.mark_filed(case_id, date(2026, 10, 15), by=ADVOCATE, today=TODAY)
+    assert snapshot.case.state is CaseState.EXTERNAL_REVIEW
+
+    snapshot = pipeline.record_decision(
+        case_id, "upheld", date(2026, 11, 20), by=ADVOCATE, today=TODAY
+    )
+    assert snapshot.case.state is CaseState.RESOLVED_UPHELD
+
+
+def test_a_decision_needs_an_appeal_that_has_gone_out(pipeline, corpus):
+    case_id = open_with(pipeline, medical_necessity_letter(corpus))
+    pipeline.process(case_id, today=TODAY)
+    with pytest.raises(ValueError, match="no appeal awaiting a decision"):
+        pipeline.record_decision(case_id, "overturned", date(2026, 10, 1), by=ADVOCATE)
+
+
+def test_closing_after_the_window_passes_is_a_persons_answer(pipeline, corpus):
+    case_id = open_with(pipeline, medical_necessity_letter(corpus))
+    late = date(2027, 6, 1)
+    snapshot = pipeline.process(case_id, today=late)
+    ask = next(e for e in snapshot.escalations if "Close the case" in e.options)
+
+    snapshot = pipeline.answer(
+        case_id, ask.escalation_id, "Close the case", by=ADVOCATE, today=late
+    )
+    assert snapshot.case.state is CaseState.CLOSED_DEADLINE_MISSED
+    assert snapshot.case.history[-1].by == ADVOCATE

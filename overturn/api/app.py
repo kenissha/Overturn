@@ -62,6 +62,11 @@ class FiledBody(BaseModel):
     filed_on: date
 
 
+class DecisionBody(BaseModel):
+    outcome: str
+    decided_on: date
+
+
 def create_app(
     *,
     data_dir: str | Path,
@@ -235,6 +240,21 @@ def create_app(
             raise HTTPException(409, str(exc)) from exc
 
     # -- outputs -------------------------------------------------------------------------
+
+    @app.post("/api/cases/{case_id}/decision")
+    def record_decision(
+        case_id: str, body: DecisionBody, x_overturn_user: str = Header(DEFAULT_USER)
+    ) -> dict[str, Any]:
+        """Record the decision on an appeal that has gone out."""
+        snapshot(case_id)
+        try:
+            return view(
+                pipeline.record_decision(
+                    case_id, body.outcome, body.decided_on, by=x_overturn_user, today=clock()
+                )
+            )
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
 
     @app.get("/api/cases/{case_id}/letter")
     def letter(case_id: str) -> dict[str, Any]:

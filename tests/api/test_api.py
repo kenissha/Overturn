@@ -252,3 +252,18 @@ def test_a_pinned_clock_is_reported_so_the_interface_can_say_so(tmp_path):
     health = TestClient(create_app(data_dir=tmp_path, today=lambda: TODAY)).get("/api/health")
     assert health.json()["today"] == TODAY.isoformat()
     assert health.json()["fixed_clock"] is True
+
+
+def test_a_decision_is_recorded_only_once_the_appeal_has_gone_out(client, corpus):
+    case_id, _ = processed(client, letter(corpus))
+    early = client.post(
+        f"/api/cases/{case_id}/decision", json={"outcome": "upheld", "decided_on": "2026-10-01"}
+    )
+    assert early.status_code == 409
+
+    client.post(f"/api/cases/{case_id}/filed", json={"filed_on": "2026-09-12"})
+    case = client.post(
+        f"/api/cases/{case_id}/decision", json={"outcome": "upheld", "decided_on": "2026-10-01"}
+    ).json()
+    assert case["state"] == "EXTERNAL_REVIEW_ELIGIBLE"
+    assert any(d["field"] == "deadline.external_review_due" for d in case["deadlines"]["deadlines"])
