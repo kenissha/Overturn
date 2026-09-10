@@ -110,7 +110,7 @@ def parse_date(field_name: str, text: str) -> str:
     try:
         if m := re.fullmatch(r"(\d{1,2})/(\d{1,2})/(\d{4})", s):
             return date(int(m[3]), int(m[1]), int(m[2])).isoformat()
-        if m := re.fullmatch(r"([A-Za-z]+)\.? (\d{1,2}), ?(\d{4})", s):
+        if m := re.fullmatch(r"([A-Za-z]+)\.? (\d{1,2}),? (\d{4})", s):
             if m[1].lower() in _MONTHS:
                 return date(int(m[3]), _MONTHS[m[1].lower()], int(m[2])).isoformat()
         if m := re.fullmatch(r"(\d{1,2}) ([A-Za-z]+)\.?,? (\d{4})", s):

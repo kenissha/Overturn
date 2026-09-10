@@ -229,7 +229,9 @@ class LedgerWriter:
             page=page,
             char_span_start=span[0],
             char_span_end=span[1],
-            quote=quote,
+            # Record what is actually on the page, not the model's copy of it: the quote
+            # was located tolerantly, and provenance should hold the text a reader will see.
+            quote=text.page_text(page)[span[0] : span[1]],
             confidence=confidence,
         )
 
