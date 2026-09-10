@@ -279,3 +279,41 @@ def test_nothing_unknown_is_ever_packet_ready():
 def test_human_verified_requires_naming_the_verifier():
     with pytest.raises(StatusInvariantViolation):
         make(status=FactStatus.HUMAN_VERIFIED, verified_by=None)
+
+
+# --- a person's answer is a source of its own -------------------------------------
+
+
+def test_a_person_can_state_what_no_document_says():
+    fact = make(
+        field="service.was_urgent",
+        value=True,
+        status=FactStatus.HUMAN_ANSWERED,
+        provenance=None,
+        confidence=None,
+        verified_by="user_004",
+    )
+    assert fact.is_known
+    assert fact.is_packet_ready
+
+
+def test_a_human_answer_must_name_who_gave_it():
+    with pytest.raises(StatusInvariantViolation):
+        make(
+            field="service.was_urgent",
+            value=True,
+            status=FactStatus.HUMAN_ANSWERED,
+            provenance=None,
+        )
+
+
+def test_a_person_cannot_state_a_deadline():
+    """Deadlines are computed. A person corrects the inputs, never the arithmetic."""
+    with pytest.raises(StatusInvariantViolation):
+        make(
+            field="deadline.internal_appeal_due",
+            value="2027-01-28",
+            status=FactStatus.HUMAN_ANSWERED,
+            provenance=None,
+            verified_by="user_004",
+        )

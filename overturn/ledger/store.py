@@ -141,6 +141,54 @@ class CaseStore:
             if line.strip()
         ]
 
+    # -- document text ------------------------------------------------------------
+
+    def text_path(self, case_id: str, doc_id: str) -> Path:
+        _reject_traversal(case_id)
+        _reject_traversal(doc_id)
+        folder = self.root / "texts" / case_id
+        folder.mkdir(parents=True, exist_ok=True)
+        return folder / f"{doc_id}.json"
+
+    def save_document_text(
+        self,
+        case_id: str,
+        doc_id: str,
+        *,
+        raw_pages: list[str],
+        pages: list[str],
+        anomalies: list[dict[str, Any]],
+    ) -> None:
+        """Keep both forms of a document's text.
+
+        ``pages`` is the normalised text every span indexes into. ``raw_pages`` is kept
+        because normalisation removes exactly what an anomaly report needs to show was
+        there — the invisible characters.
+        """
+        payload = {
+            "doc_id": doc_id,
+            "pages": pages,
+            "raw_pages": raw_pages,
+            "anomalies": anomalies,
+            "extracted_at": None,
+        }
+        _atomic_write(
+            self.text_path(case_id, doc_id), json.dumps(payload, ensure_ascii=False, indent=2)
+        )
+
+    def load_document_text(self, case_id: str, doc_id: str) -> dict[str, Any]:
+        path = self.text_path(case_id, doc_id)
+        if not path.exists():
+            raise FileNotFoundError(f"No text stored for {doc_id} on {case_id}")
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def mark_extracted(self, case_id: str, doc_id: str) -> None:
+        data = self.load_document_text(case_id, doc_id)
+        data["extracted_at"] = utcnow().isoformat()
+        _atomic_write(
+            self.text_path(case_id, doc_id), json.dumps(data, ensure_ascii=False, indent=2)
+        )
+
     # -- writes -------------------------------------------------------------------
 
     def put_fact(self, case: Case, fact: Fact) -> None:

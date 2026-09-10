@@ -68,6 +68,15 @@ class FactStatus(StrEnum):
     NOT_APPLICABLE = "not_applicable"
     """Not required for this denial category."""
 
+    HUMAN_ANSWERED = "human_answered"
+    """A person supplied it, and no document on file states it.
+
+    The answer to an escalation: whether a service was urgent, the date an appeal was
+    filed, that a physician's letter is now on file. It carries no document provenance
+    because its source is the person, who is named in ``verified_by``. Deadline fields can
+    never hold it: those are computed, not stated.
+    """
+
 
 class TrustZone(StrEnum):
     """Whether content may be read by an agent that holds outward-facing tools."""
@@ -235,6 +244,22 @@ class Fact(BaseModel):
                     f"{self.field}: status 'not_applicable' cannot carry a value."
                 )
 
+        elif status is FactStatus.HUMAN_ANSWERED:
+            if self.value is None:
+                raise StatusInvariantViolation(
+                    f"{self.field}: status 'human_answered' requires a value."
+                )
+            if not self.verified_by:
+                raise StatusInvariantViolation(
+                    f"{self.field}: a human answer must name the person who gave it."
+                )
+            spec = get_field(self.field)
+            if spec is not None and spec.origin.value == "engine":
+                raise StatusInvariantViolation(
+                    f"{self.field}: computed fields cannot be stated by a person; correct "
+                    "the facts they are computed from instead."
+                )
+
         if status is FactStatus.HUMAN_VERIFIED and not self.verified_by:
             raise StatusInvariantViolation(
                 f"{self.field}: status 'human_verified' requires verified_by."
@@ -254,6 +279,7 @@ class Fact(BaseModel):
         return self.status in (
             FactStatus.EXTRACTED,
             FactStatus.HUMAN_VERIFIED,
+            FactStatus.HUMAN_ANSWERED,
             FactStatus.REGIME_DEFAULT,
         )
 
@@ -268,7 +294,7 @@ class Fact(BaseModel):
         if not self.is_known:
             return False
         if self.spec.is_critical:
-            return self.status is FactStatus.HUMAN_VERIFIED
+            return self.status in (FactStatus.HUMAN_VERIFIED, FactStatus.HUMAN_ANSWERED)
         return True
 
 
@@ -343,6 +369,17 @@ class StateTransition(BaseModel):
     reason: str
 
 
+class EscalationAnswer(BaseModel):
+    """A person's reply to one escalation. Answered questions are not asked again."""
+
+    model_config = ConfigDict(frozen=True)
+
+    escalation_id: str
+    answer: str
+    by: str
+    at: datetime = Field(default_factory=utcnow)
+
+
 class Case(BaseModel):
     """One denial file."""
 
@@ -358,6 +395,7 @@ class Case(BaseModel):
     documents: list[Document] = Field(default_factory=list)
     facts: dict[str, Fact] = Field(default_factory=dict)
     history: list[StateTransition] = Field(default_factory=list)
+    answers: dict[str, EscalationAnswer] = Field(default_factory=dict)
 
     def document(self, doc_id: str) -> Document | None:
         return next((d for d in self.documents if d.doc_id == doc_id), None)
@@ -374,4 +412,3 @@ class Case(BaseModel):
         """
         fact = self.facts.get(field)
         return fact.value if fact and fact.is_known else None
-

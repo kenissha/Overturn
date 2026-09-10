@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import tempfile
 from collections import Counter
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
 from enum import StrEnum
@@ -34,6 +33,7 @@ from overturn.engine.deadlines import compute_deadlines
 from overturn.engine.packs import PackRegistry
 from overturn.engine.rules import classify
 from overturn.eval.corpus import EXTRACTION_FIELDS, Sample
+from overturn.extraction import ExtractionInput, Extractor
 from overturn.ledger.documents import DocumentText
 from overturn.ledger.fields import FactKind, get_field
 from overturn.ledger.schema import (
@@ -47,22 +47,6 @@ from overturn.ledger.schema import (
 )
 from overturn.ledger.store import CaseStore
 from overturn.tools.ledger_tools import LedgerWriter
-
-# --- the extractor contract ------------------------------------------------------------
-
-
-@dataclass(frozen=True, slots=True)
-class ExtractionInput:
-    """Everything an extractor may see. Deliberately excludes the answer key."""
-
-    doc_id: str
-    pages: tuple[str, ...]
-    fields: tuple[str, ...]
-
-
-Extractor = Callable[[ExtractionInput, LedgerWriter], None]
-"""Reads the input and records facts exclusively through the writer's two tools."""
-
 
 # --- per-field outcomes -----------------------------------------------------------------
 
@@ -107,8 +91,10 @@ def score_field(field_name: str, gold_value: FactValue, fact: Fact | None) -> Ou
             return Outcome.UNATTEMPTED
         if fact.status is FactStatus.MISSING or not fact.is_known:
             return Outcome.FALSE_ABSTENTION
-        return Outcome.CORRECT if values_match(field_name, gold_value, fact.value) else (
-            Outcome.WRONG_VALUE
+        return (
+            Outcome.CORRECT
+            if values_match(field_name, gold_value, fact.value)
+            else (Outcome.WRONG_VALUE)
         )
 
     if fact is None:
@@ -255,8 +241,10 @@ class EvalReport:
     def field_accuracy(self) -> float | None:
         c = self.outcome_counts
         with_value = (
-            c[Outcome.CORRECT] + c[Outcome.WRONG_VALUE]
-            + c[Outcome.FALSE_ABSTENTION] + c[Outcome.UNATTEMPTED]
+            c[Outcome.CORRECT]
+            + c[Outcome.WRONG_VALUE]
+            + c[Outcome.FALSE_ABSTENTION]
+            + c[Outcome.UNATTEMPTED]
         )
         return _ratio(c[Outcome.CORRECT], with_value)
 
@@ -268,9 +256,9 @@ class EvalReport:
     @property
     def correct_abstention(self) -> float | None:
         c = self.outcome_counts
-        absent = c[Outcome.CORRECT_ABSTENTION] + c[Outcome.UNSUPPORTED_VALUE] + c[
-            Outcome.SILENT_ABSENT
-        ]
+        absent = (
+            c[Outcome.CORRECT_ABSTENTION] + c[Outcome.UNSUPPORTED_VALUE] + c[Outcome.SILENT_ABSENT]
+        )
         return _ratio(c[Outcome.CORRECT_ABSTENTION], absent)
 
     @property
@@ -290,8 +278,7 @@ class EvalReport:
     @property
     def anomaly_false_positive_rate(self) -> float | None:
         clean = [
-            r for r in self.results
-            if not r.anomaly_expected and "fact_poisoning" not in r.tags
+            r for r in self.results if not r.anomaly_expected and "fact_poisoning" not in r.tags
         ]
         return _ratio(sum(bool(r.anomaly_found) for r in clean), len(clean))
 
@@ -318,8 +305,7 @@ class EvalReport:
             "| Metric | Result |",
             "|---|---|",
             f"| Field accuracy | {pct(self.field_accuracy)} |",
-            f"| Hallucination rate (wrong or unsupported value) | "
-            f"{pct(self.hallucination_rate)} |",
+            f"| Hallucination rate (wrong or unsupported value) | {pct(self.hallucination_rate)} |",
             f"| Correct abstention (explicitly marked `missing`) | "
             f"{pct(self.correct_abstention)} |",
             f"| Classification accuracy | {pct(self.classification_accuracy)} |",

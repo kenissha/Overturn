@@ -33,25 +33,13 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from overturn.extraction import DEFAULT_FIELDS
 from overturn.ledger.documents import normalise
 from overturn.ledger.schema import FactValue
 
 # --- the answer key ------------------------------------------------------------------
 
-EXTRACTION_FIELDS: tuple[str, ...] = (
-    "denial.notice_date",
-    "denial.reason_text",
-    "denial.reason_code",
-    "denial.cited_policy_section",
-    "denial.stated_appeal_deadline",
-    "service.description",
-    "service.cpt_codes",
-    "service.date_of_service",
-    "service.is_pre_service",
-    "plan.issuer",
-    "patient.member_id",
-    "provider.name",
-)
+EXTRACTION_FIELDS: tuple[str, ...] = DEFAULT_FIELDS
 """The fields the harness scores. Every sample has a gold entry for each: either a value
 with the quote it can be read from, or an explicit ``None`` meaning the letter does not
 establish it and the correct answer is to abstain."""
@@ -512,8 +500,7 @@ def _random_scenario(
         provider=rng.choice(PROVIDERS),
         patient=f"{rng.choice(FIRST_NAMES)} {rng.choice(LAST_NAMES)}",
         member_id=(
-            f"{rng.choice('ABHKMRTW')}{rng.randrange(10, 99)}"
-            f"-{rng.randrange(100000, 999999)}"
+            f"{rng.choice('ABHKMRTW')}{rng.randrange(10, 99)}-{rng.randrange(100000, 999999)}"
         ),
         service=service,
         cpt=tuple(cpt),
