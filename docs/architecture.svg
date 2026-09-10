@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3a3834"/>
+    </marker>
+    <marker id="arrow-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2d6a4b"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="860" fill="#f3f2ef"/>
+
+  <text x="40" y="52" font-size="26" font-weight="700" fill="#1c1b19">Overturn — architecture</text>
+  <text x="40" y="80" font-size="15" fill="#6d6a64">The model reads. Code decides. A person files.</text>
+
+  <!-- column 1: intake -->
+  <rect x="40" y="150" width="210" height="80" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="56" y="180" font-size="15" font-weight="600" fill="#1c1b19">Denial letter</text>
+  <text x="56" y="202" font-size="12.5" fill="#6d6a64">PDF text layer or plain text</text>
+  <text x="56" y="219" font-size="12.5" fill="#6d6a64">uploaded by the advocate</text>
+
+  <rect x="40" y="280" width="210" height="140" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="56" y="308" font-size="15" font-weight="600" fill="#1c1b19">Ingest</text>
+  <text x="56" y="332" font-size="12.5" fill="#3a3834">normalise text</text>
+  <text x="56" y="351" font-size="12.5" fill="#3a3834">strip hidden characters</text>
+  <text x="56" y="370" font-size="12.5" fill="#3a3834">anomaly scan — deterministic,</text>
+  <text x="56" y="387" font-size="12.5" fill="#3a3834">no model asked</text>
+  <text x="56" y="408" font-size="11.5" fill="#6d6a64">spans kept for the interface</text>
+
+  <!-- untrusted zone -->
+  <rect x="290" y="120" width="330" height="330" rx="6" fill="#fdf3f1" stroke="#b42318" stroke-width="2" stroke-dasharray="9 6"/>
+  <text x="308" y="146" font-size="12" font-weight="700" letter-spacing="1.2" fill="#b42318">UNTRUSTED ZONE — READS RAW TEXT</text>
+
+  <rect x="310" y="165" width="290" height="100" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="326" y="193" font-size="15" font-weight="600" fill="#1c1b19">Extraction agent</text>
+  <text x="326" y="215" font-size="12.5" fill="#3a3834">Strands Agents · Claude on Amazon Bedrock</text>
+  <text x="326" y="234" font-size="12.5" fill="#3a3834">one fresh agent per document</text>
+  <text x="326" y="253" font-size="12.5" fill="#3a3834">only document-origin fields are asked for</text>
+
+  <rect x="310" y="280" width="290" height="150" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="326" y="306" font-size="13" font-weight="600" fill="#1c1b19">Holds exactly two tools</text>
+  <text x="326" y="330" font-size="12" font-family="Cascadia Mono, Consolas, monospace" fill="#1c1b19">write_fact(field, value,</text>
+  <text x="404" y="347" font-size="12" font-family="Cascadia Mono, Consolas, monospace" fill="#1c1b19">page, quote, confidence)</text>
+  <text x="326" y="370" font-size="12" font-family="Cascadia Mono, Consolas, monospace" fill="#1c1b19">mark_missing(field, reason)</text>
+  <text x="326" y="396" font-size="12" fill="#b42318">No tool can send, submit, notify,</text>
+  <text x="326" y="413" font-size="12" fill="#b42318">close a case or compute a deadline.</text>
+
+  <!-- ledger -->
+  <rect x="660" y="120" width="250" height="330" rx="6" fill="#fff" stroke="#1c1b19" stroke-width="1.5"/>
+  <text x="678" y="150" font-size="15" font-weight="700" fill="#1c1b19">FACT LEDGER</text>
+  <text x="678" y="172" font-size="12" fill="#6d6a64">the single source of truth</text>
+  <text x="678" y="202" font-size="12.5" fill="#3a3834">every value: document · page ·</text>
+  <text x="678" y="220" font-size="12.5" fill="#3a3834">character span · quote</text>
+  <text x="678" y="246" font-size="12.5" fill="#3a3834">quote located and verified</text>
+  <text x="678" y="264" font-size="12.5" fill="#3a3834">by the tool, not claimed</text>
+  <text x="678" y="290" font-size="12.5" fill="#3a3834">unknown fields refused</text>
+  <text x="678" y="310" font-size="12.5" fill="#3a3834">deadlines: engine only</text>
+  <text x="678" y="330" font-size="12.5" fill="#3a3834">judgments: people only</text>
+  <text x="678" y="356" font-size="12.5" font-weight="600" fill="#1c1b19">missing is a recorded state,</text>
+  <text x="678" y="374" font-size="12.5" font-weight="600" fill="#1c1b19">never a guess</text>
+  <line x1="678" y1="392" x2="892" y2="392" stroke="#e0ddd6"/>
+  <text x="678" y="414" font-size="12" fill="#6d6a64">write audit: every attempt,</text>
+  <text x="678" y="431" font-size="12" fill="#6d6a64">refusals included, PII redacted</text>
+
+  <!-- deterministic engine -->
+  <rect x="950" y="120" width="410" height="330" rx="6" fill="#fff" stroke="#1c1b19" stroke-width="1.5"/>
+  <text x="968" y="150" font-size="15" font-weight="700" fill="#1c1b19">DETERMINISTIC ENGINE</text>
+  <text x="968" y="172" font-size="12" fill="#6d6a64">plain Python · no model anywhere · unit tested</text>
+
+  <text x="968" y="204" font-size="13" font-weight="600" fill="#1c1b19">Rule packs</text>
+  <text x="1110" y="204" font-size="12.5" fill="#3a3834">YAML, no executable code</text>
+  <text x="968" y="232" font-size="13" font-weight="600" fill="#1c1b19">Classification</text>
+  <text x="1110" y="232" font-size="12.5" fill="#3a3834">declines on two denial reasons</text>
+  <text x="968" y="260" font-size="13" font-weight="600" fill="#1c1b19">Evidence</text>
+  <text x="1110" y="260" font-size="12.5" fill="#3a3834">critical facts need a person</text>
+  <text x="968" y="288" font-size="13" font-weight="600" fill="#1c1b19">Deadlines</text>
+  <text x="1110" y="288" font-size="12.5" fill="#3a3834">letter date wins · receipt-anchored</text>
+  <text x="1110" y="305" font-size="12.5" fill="#3a3834">only ever errs toward less time</text>
+  <text x="968" y="333" font-size="13" font-weight="600" fill="#1c1b19">Escalation gate</text>
+  <text x="1110" y="333" font-size="12.5" fill="#3a3834">four triggers, each asked once</text>
+  <text x="968" y="361" font-size="13" font-weight="600" fill="#1c1b19">Argument planner</text>
+  <text x="1110" y="361" font-size="12.5" fill="#3a3834">writes only what the ledger</text>
+  <text x="1110" y="378" font-size="12.5" fill="#3a3834">supports; says what it omitted</text>
+  <line x1="968" y1="398" x2="1342" y2="398" stroke="#e0ddd6"/>
+  <text x="968" y="422" font-size="12" fill="#6d6a64">reads the ledger — never a document</text>
+
+  <!-- advocate -->
+  <rect x="950" y="520" width="410" height="200" rx="6" fill="#fff" stroke="#2d6a4b" stroke-width="1.5"/>
+  <text x="968" y="550" font-size="15" font-weight="700" fill="#1c1b19">THE ADVOCATE'S INTERFACE</text>
+  <text x="968" y="580" font-size="12.5" fill="#3a3834">Today: the few files that need a person</text>
+  <text x="968" y="600" font-size="12.5" fill="#3a3834">Split view: letter ↔ ledger, span highlighting</text>
+  <text x="968" y="620" font-size="12.5" fill="#3a3834">Deadline strip · Needs you · Draft · Trace</text>
+  <text x="968" y="652" font-size="12.5" font-weight="600" fill="#2d6a4b">Answers, confirms critical facts, files.</text>
+  <text x="968" y="672" font-size="12.5" font-weight="600" fill="#2d6a4b">Overturn never sends anything.</text>
+  <text x="968" y="700" font-size="12" fill="#6d6a64">React + TypeScript · FastAPI</text>
+
+  <!-- supporting services -->
+  <rect x="660" y="540" width="250" height="120" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="678" y="568" font-size="14" font-weight="600" fill="#1c1b19">Background tick</text>
+  <text x="678" y="590" font-size="12.5" fill="#3a3834">every 15 minutes: read unread</text>
+  <text x="678" y="608" font-size="12.5" fill="#3a3834">letters, re-evaluate every file,</text>
+  <text x="678" y="626" font-size="12.5" fill="#3a3834">surface each new question once</text>
+  <text x="678" y="646" font-size="11.5" fill="#6d6a64">cannot send or notify</text>
+
+  <rect x="310" y="540" width="290" height="120" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="326" y="568" font-size="14" font-weight="600" fill="#1c1b19">Model layer</text>
+  <text x="326" y="590" font-size="12.5" fill="#3a3834">models chosen by role in</text>
+  <text x="326" y="608" font-size="12" font-family="Cascadia Mono, Consolas, monospace" fill="#1c1b19">config/models.yaml</text>
+  <text x="326" y="630" font-size="12.5" fill="#3a3834">Amazon Bedrock · Anthropic API ·</text>
+  <text x="326" y="648" font-size="12.5" fill="#3a3834">local model (data stays on site)</text>
+
+  <rect x="40" y="540" width="210" height="120" rx="4" fill="#fff" stroke="#bdb8ae"/>
+  <text x="56" y="568" font-size="14" font-weight="600" fill="#1c1b19">Evaluation</text>
+  <text x="56" y="590" font-size="12.5" fill="#3a3834">48-letter synthetic corpus</text>
+  <text x="56" y="608" font-size="12.5" fill="#3a3834">same write path as production</text>
+  <text x="56" y="626" font-size="12.5" fill="#3a3834">red-team suite on every build</text>
+  <text x="56" y="646" font-size="11.5" fill="#6d6a64">calibrated before scoring</text>
+
+  <!-- flows -->
+  <line x1="145" y1="230" x2="145" y2="276" stroke="#3a3834" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="250" y1="330" x2="306" y2="230" stroke="#3a3834" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="206" y="262" font-size="11" fill="#6d6a64">text</text>
+  <line x1="600" y1="355" x2="656" y2="300" stroke="#3a3834" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="612" y="316" font-size="11" fill="#6d6a64">facts</text>
+  <line x1="910" y1="285" x2="946" y2="285" stroke="#3a3834" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="1155" y1="450" x2="1155" y2="516" stroke="#3a3834" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1164" y="490" font-size="11" fill="#6d6a64">questions, gaps, deadlines, draft</text>
+  <path d="M950,560 L930,560 L930,505 L800,505 L800,454" fill="none" stroke="#2d6a4b" stroke-width="1.5" marker-end="url(#arrow-ok)"/>
+  <text x="792" y="524" font-size="11" text-anchor="end" fill="#2d6a4b">answers → human_verified / human_answered</text>
+  <path d="M145,420 L145,480 L1080,480 L1080,454" fill="none" stroke="#b42318" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <text x="260" y="474" font-size="11" fill="#b42318">anomalies → escalation gate (never to the agent)</text>
+  <line x1="910" y1="600" x2="946" y2="600" stroke="#3a3834" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="455" y1="540" x2="455" y2="434" stroke="#3a3834" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+
+  <!-- legend -->
+  <rect x="40" y="770" width="1320" height="60" rx="4" fill="#fff" stroke="#e0ddd6"/>
+  <line x1="60" y1="800" x2="100" y2="800" stroke="#b42318" stroke-width="2" stroke-dasharray="9 6"/>
+  <text x="110" y="804" font-size="12.5" fill="#3a3834">untrusted zone: reads documents, holds no power worth hijacking</text>
+  <line x1="560" y1="800" x2="600" y2="800" stroke="#1c1b19" stroke-width="1.5"/>
+  <text x="610" y="804" font-size="12.5" fill="#3a3834">trusted: reads only the ledger</text>
+  <line x1="850" y1="800" x2="890" y2="800" stroke="#2d6a4b" stroke-width="1.5"/>
+  <text x="900" y="804" font-size="12.5" fill="#3a3834">a person: the only actor who can file</text>
+</svg>
