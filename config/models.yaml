@@ -1,0 +1,46 @@
+# Which model each role runs on, per provider.
+#
+# Changing provider is a configuration change, not a code change. An organisation that
+# cannot let case data leave its own infrastructure can point every role at a local model
+# (provider: ollama) without touching the agents.
+#
+# Overrides, in order of precedence:
+#   OVERTURN_MODEL_PROVIDER            bedrock | anthropic | ollama
+#   OVERTURN_MODEL_ID_<ROLE>           e.g. OVERTURN_MODEL_ID_EXTRACTION
+#   AWS_REGION                         Bedrock region
+#
+# Every role defaults to Claude Opus 5. OVERTURN.md §10 sketches a cheaper tier for
+# extraction; that is a cost decision to make against measured eval results, and it is one
+# line here (claude-sonnet-5 / anthropic.claude-sonnet-5) when it is made.
+#
+# No sampling parameters (temperature, top_p). Claude Opus 5 rejects them with a 400.
+# Behaviour is steered by the prompt and the tools, not by sampling.
+#
+# Bedrock model ids must be confirmed against the Bedrock console for the account and
+# region once model access is granted; some accounts require a regional inference-profile
+# id. Use OVERTURN_MODEL_ID_<ROLE> rather than editing this file for a one-off.
+
+default_provider: bedrock
+
+providers:
+  bedrock:
+    region: us-east-1
+  anthropic: {}
+  ollama:
+    host: http://localhost:11434
+
+roles:
+  extraction:
+    # Reads untrusted document text. Holds two ledger-writing tools and nothing else.
+    bedrock: anthropic.claude-opus-5
+    anthropic: claude-opus-5
+    ollama: llama3.1
+    max_tokens: 16000
+
+  drafting:
+    # Reads the argument plan only, never a document. Optional polish over a letter the
+    # engine has already assembled.
+    bedrock: anthropic.claude-opus-5
+    anthropic: claude-opus-5
+    ollama: llama3.1
+    max_tokens: 16000

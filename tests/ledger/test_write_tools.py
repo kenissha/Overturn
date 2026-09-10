@@ -296,3 +296,85 @@ def test_pii_never_reaches_the_audit_log(writer):
     audit_text = writer.store.audit_path(writer.case.case_id).read_text(encoding="utf-8")
     assert "A-9931882" not in audit_text
     assert "redacted" in audit_text
+
+
+# --- the agent-facing form: quote, and let the tool find it -------------------------
+
+
+def test_a_quote_is_located_on_the_page_by_the_tool(writer):
+    result = writer.write_fact_by_quote(
+        "denial.reason_text",
+        "not medically necessary",
+        "doc_denial_001",
+        1,
+        "not medically necessary",
+        0.9,
+    )
+    assert result.ok, result.message
+    fact = writer.case.fact("denial.reason_text")
+    assert fact.provenance.char_span == span_of(writer, "not medically necessary")
+
+
+def test_line_breaks_and_case_in_a_quote_are_tolerated(writer):
+    result = writer.write_fact_by_quote(
+        "denial.reason_text",
+        "not medically necessary",
+        "doc_denial_001",
+        1,
+        "NOT medically\n   necessary",
+        0.9,
+    )
+    assert result.ok, result.message
+
+
+def test_a_quote_wrapped_in_quotation_marks_is_found(writer):
+    result = writer.write_fact_by_quote(
+        "patient.member_id", "A-9931882", "doc_denial_001", 1, '"A-9931882"', 0.9
+    )
+    assert result.ok, result.message
+
+
+def test_a_quote_that_is_not_on_the_page_is_refused(writer):
+    result = writer.write_fact_by_quote(
+        "denial.reason_text",
+        "experimental",
+        "doc_denial_001",
+        1,
+        "determined to be experimental",
+        0.9,
+    )
+    assert not result.ok
+    assert result.error_type == "ProvenanceNotVerified"
+
+
+def test_a_quote_on_a_page_that_does_not_exist_is_refused(writer):
+    result = writer.write_fact_by_quote(
+        "patient.member_id", "A-9931882", "doc_denial_001", 7, "A-9931882", 0.9
+    )
+    assert not result.ok
+    assert result.error_type == "IndexError"
+
+
+def test_a_printed_date_is_converted_by_code_not_by_the_model(writer):
+    result = writer.write_fact_by_quote(
+        "denial.notice_date", "08/01/2026", "doc_denial_001", 1, "2026-08-01", 0.95
+    )
+    assert result.ok, result.message
+    assert writer.case.value("denial.notice_date") == "2026-08-01"
+
+
+def test_an_unreadable_value_is_refused_and_audited(writer):
+    result = writer.write_fact_by_quote(
+        "service.is_pre_service", "maybe", "doc_denial_001", 1, "requested service", 0.5
+    )
+    assert not result.ok
+    assert result.error_type == "FactTypeMismatch"
+    assert writer.store.read_audit(writer.case.case_id)[-1]["outcome"] == "refused"
+
+
+def test_quoting_does_not_open_a_path_to_engine_fields(writer):
+    result = writer.write_fact_by_quote(
+        "deadline.internal_appeal_due", "2027-01-28", "doc_denial_001", 1, "2026-08-01", 1.0
+    )
+    assert not result.ok
+    assert result.error_type == "FieldNotWritableBy"

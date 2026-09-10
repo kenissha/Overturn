@@ -35,6 +35,7 @@ from overturn.ledger.errors import (
 from overturn.ledger.fields import FieldOrigin, get_field
 from overturn.ledger.schema import Case, Fact, FactStatus, FactValue, Provenance
 from overturn.ledger.store import CaseStore
+from overturn.tools.quoting import coerce_value, locate_quote
 
 
 class ProvenanceNotVerified(LedgerError):
@@ -176,6 +177,62 @@ class LedgerWriter:
         )
         return WriteResult(True, field, f"Recorded {field} as missing.")
 
+    def write_fact_by_quote(
+        self,
+        field: str,
+        value: FactValue,
+        doc_id: str,
+        page: int,
+        quote: str,
+        confidence: float,
+    ) -> WriteResult:
+        """Record a fact by quoting it. The span is found by this tool, not claimed.
+
+        This is the form the extraction agent is given. Models copy text far more reliably
+        than they count characters, so the agent supplies the quote and the page, and the
+        quote is located on that page here. The guarantee is unchanged: a quote that is
+        not on the page is not found, and nothing is written.
+
+        String values are converted to the field's type by code (see
+        :mod:`overturn.tools.quoting`), so "August 1, 2026" becomes ``2026-08-01`` without
+        asking a model to do date handling.
+        """
+        try:
+            self._check_writable(field)
+            parsed = coerce_value(field, value)
+            if not quote or not quote.strip():
+                raise ProvenanceRequired(
+                    "A quote is required: copy the text that states the value exactly as it "
+                    "is printed, or call mark_missing."
+                )
+            text = self.texts.get(doc_id)
+            if text is None:
+                raise ProvenanceRequired(
+                    f"No document text available for {doc_id!r}. A value can only be "
+                    "recorded against a document this case actually holds."
+                )
+            span = locate_quote(text.page_text(page), quote)
+            if span is None:
+                raise ProvenanceNotVerified(
+                    f"The quote {quote!r} does not appear on {doc_id} page {page}. Copy the "
+                    "text exactly as printed, check the page number, or call mark_missing."
+                )
+        except LedgerError as exc:
+            return self._refuse(field, exc, value=value)
+        except (ValueError, IndexError) as exc:
+            return self._refuse(field, exc, value=value)
+
+        return self.write_fact(
+            field=field,
+            value=parsed,
+            doc_id=doc_id,
+            page=page,
+            char_span_start=span[0],
+            char_span_end=span[1],
+            quote=quote,
+            confidence=confidence,
+        )
+
     # -- internals ----------------------------------------------------------------
 
     def _build_fact(
@@ -223,13 +280,10 @@ class LedgerWriter:
         if spec.origin not in self.allowed_origins:
             raise FieldNotWritableBy(
                 f"{field!r} has origin {spec.origin.value!r} and cannot be written by "
-                f"{self.actor}. "
-                + _ORIGIN_EXPLANATION.get(spec.origin, "")
+                f"{self.actor}. " + _ORIGIN_EXPLANATION.get(spec.origin, "")
             )
 
-    def _verify_provenance(
-        self, doc_id: str, page: int, span: tuple[int, int], quote: str
-    ) -> str:
+    def _verify_provenance(self, doc_id: str, page: int, span: tuple[int, int], quote: str) -> str:
         """Follow the citation. A source that cannot be followed is not a source."""
         text = self.texts.get(doc_id)
         if text is None:
@@ -267,8 +321,7 @@ class LedgerWriter:
 
 _ORIGIN_EXPLANATION = {
     FieldOrigin.ENGINE: (
-        "Deadlines are computed by the deterministic engine and are never written from a "
-        "document."
+        "Deadlines are computed by the deterministic engine and are never written from a document."
     ),
     FieldOrigin.HUMAN: (
         "This is a judgment no document settles. It is raised with a person instead of "

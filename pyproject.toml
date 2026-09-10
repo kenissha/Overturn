@@ -24,6 +24,7 @@ agents = [
     "strands-agents>=0.1",
     "strands-agents-tools>=0.1",
     "boto3>=1.34",
+    "anthropic>=0.40",
 ]
 api = [
     "fastapi>=0.110",
