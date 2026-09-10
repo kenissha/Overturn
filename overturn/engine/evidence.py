@@ -163,6 +163,16 @@ def assess(case: Case, pack: RulePack) -> Readiness:
             # Known, sourced, and still not enough: a critical field awaiting a person.
             unverified.append(field)
 
+    # A critical fact the pack does not list still changes the outcome: whether a
+    # decision is final moves the whole case to external review and changes every
+    # deadline. Found by the red-team suite, where a planted 'final determination'
+    # line was recorded with a genuine citation and nobody was asked to check it.
+    for name, fact in case.facts.items():
+        if name in unverified or name in pack.required_facts:
+            continue
+        if fact.spec.is_critical and fact.status is FactStatus.EXTRACTED:
+            unverified.append(name)
+
     return Readiness(
         pack=pack,
         present_evidence=tuple(present),

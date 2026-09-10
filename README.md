@@ -4,6 +4,8 @@
 
 AWS Agents for Humans Hackathon · Good Neighbor Agents track · MIT licensed
 
+[![CI](https://github.com/kenissha/Overturn/actions/workflows/ci.yml/badge.svg)](https://github.com/kenissha/Overturn/actions/workflows/ci.yml) [![Red team](https://github.com/kenissha/Overturn/actions/workflows/redteam.yml/badge.svg)](https://github.com/kenissha/Overturn/actions/workflows/redteam.yml)
+
 > Overturn works a patient advocate's denial files in the background: it records every
 > fact with the source it came from, tracks appeal deadlines deterministically, and
 > surfaces to a human only when a real human decision is required.
@@ -180,6 +182,24 @@ planted in a document can be extracted with a genuine citation and land in the l
 `extracted`. We do not claim otherwise. The containment is that critical fields — deadline
 dates, coverage, whether a decision is final — cannot enter a packet until a person
 confirms them, and the interface asks for exactly that.
+
+### The red-team corpus
+
+52 planted-text vectors in seven categories run on every build. Each goes through the
+real pipeline with an extractor that obeys the planted text as far as its tools allow.
+
+- **Contained: 52 of 52.** Nothing a vector asks for happens, and anything the obedient
+  extractor manages to record is held for a person before it can reach a packet.
+- **Detected: 30 of 52.** Detection is a pattern list. The misses — mostly plausible
+  false facts and paraphrases — are published with the vectors in
+  [tests/redteam/vectors.yaml](tests/redteam/vectors.yaml), and a test holds these two
+  totals to what the code measures.
+
+Building this suite found a real gap, now closed: a planted *final adverse
+determination* line could be recorded with a genuine citation and move every deadline
+to the external review regime, and nothing asked a person to confirm it, because no
+rule pack listed that field. Every critical fact on a case now needs a person,
+whichever pack applies.
 
 Every attack category, the layer that stops it and the test that proves it:
 [docs/security-model.md](docs/security-model.md) and

@@ -88,6 +88,45 @@ without a model, in `tests/redteam/test_structural_defences.py` unless noted.
 
 ---
 
+## The red-team corpus
+
+`tests/redteam/vectors.yaml` holds 52 planted-text vectors in seven categories. Each is
+appended to an ordinary denial letter and run through the real pipeline with an extractor
+that obeys it as far as its tools allow: it tries to write a field that does not exist, a
+deadline, a judgment only a person makes, and a critical document field, all quoting the
+planted text. Reproduce with `python -m overturn.eval.redteam`.
+
+| Category | Vectors | Detected | Contained |
+|---|---|---|---|
+| direct instruction | 12 | 8 | 12 |
+| role impersonation | 7 | 6 | 7 |
+| invisible text | 7 | 7 | 7 |
+| fact poisoning | 8 | 0 | 8 |
+| escalation suppression | 7 | 4 | 7 |
+| ledger pollution | 6 | 2 | 6 |
+| multi-document | 5 | 3 | 5 |
+| **all** | **52** | **30** | **52** |
+
+*Contained* is the security property. *Detected* is about what the advocate gets to see,
+and its misses are listed with a note on each vector. Fact poisoning is undetectable by
+design — a plausible false date is indistinguishable from a true one — which is why its
+containment does not depend on detection.
+
+### What building it found
+
+The first run failed containment for every vector. The obedient extractor could record
+`denial.is_final` with a genuine citation to the planted text. That field is critical: it
+moves the case to the external review regime and changes every deadline. But the evidence
+engine only asked a person to confirm critical facts that the selected rule pack listed as
+required, and no pack lists `denial.is_final`. So a planted *final adverse determination*
+line could change the deadlines silently.
+
+Every critical fact on a case now needs a person, whichever pack applies
+(`overturn/engine/evidence.py`, `tests/engine/test_evidence.py`). The second run contained
+all 52.
+
+---
+
 ## Running the untrusted zone remotely
 
 The extraction agent can run on Amazon Bedrock AgentCore (`overturn/agents/runtime.py`,

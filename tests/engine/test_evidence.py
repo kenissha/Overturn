@@ -206,3 +206,12 @@ def test_the_summary_counts_each_kind_of_block_separately(pack):
     assert "1 required document(s) not on file" in summary
     assert "1 required fact(s) unresolved" in summary
     assert "1 critical fact(s) unverified" in summary
+
+
+def test_a_critical_fact_the_pack_does_not_list_still_needs_a_person(pack):
+    """Whether a decision is final changes every deadline, whatever the pack requires."""
+    case = fully_stocked_case(pack)
+    extracted(case, "denial.is_final", True)
+    readiness = assess(case, pack)
+    assert "denial.is_final" in readiness.unverified_critical_facts
+    assert not readiness.is_packet_ready
