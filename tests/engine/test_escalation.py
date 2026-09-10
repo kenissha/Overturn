@@ -365,3 +365,18 @@ def test_the_plans_response_clock_asks_about_the_plan_not_the_filing(registry, p
     assert len(asked) == 1  # the filing window is met; only the plan's clock remains
     assert "Has it arrived" in asked[0].question
     assert "Decision received" in asked[0].options
+
+
+def test_a_confirmation_request_names_the_field_in_words(registry, pack):
+    """Seen on the demo workspace: 'Please confirm is pre service'. Never again."""
+    case = ready_case(pack)
+    extracted(case, "service.is_pre_service", False)
+    asked = [
+        e.question
+        for e in gate(case, registry, pack).by_trigger(Trigger.HUMAN_JUDGMENT)
+        if e.subject == "service.is_pre_service"
+    ]
+    assert asked == [
+        "Please confirm whether the plan decided before the service was given against the "
+        "original document."
+    ]

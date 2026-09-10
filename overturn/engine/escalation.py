@@ -483,6 +483,24 @@ def _when(days: int) -> str:
     return "today" if days == 0 else f"{-days} day(s) ago"
 
 
+_FIELD_NAMES = {
+    "denial.notice_date": "the notice date",
+    "denial.received_date": "the date the notice was received",
+    "denial.is_final": "whether this is a final decision",
+    "denial.stated_appeal_deadline": "the appeal deadline printed in the letter",
+    "denial.reason_text": "the denial reason",
+    "denial.cited_policy_section": "the policy section the denial cites",
+    "service.is_pre_service": "whether the plan decided before the service was given",
+    "service.was_urgent": "whether the service was urgent",
+    "plan.covers_service": "whether the plan covers this service",
+    "appeal.filed_date": "the filing date",
+    "provider.is_treating_physician": "whether the treating physician wrote the letter",
+}
+"""How the fields a person may be asked about read in a sentence."""
+
+
 def _human(field_name: str) -> str:
     """Turn a field name into something readable in a sentence."""
+    if field_name in _FIELD_NAMES:
+        return _FIELD_NAMES[field_name]
     return field_name.split(".", 1)[-1].replace("_", " ")
