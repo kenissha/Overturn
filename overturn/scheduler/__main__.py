@@ -40,7 +40,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     from overturn.agents.factory import extractor_from_env
+    from overturn.telemetry import setup_from_env
 
+    setup_from_env()
     extractor = extractor_from_env()
     pipeline = Pipeline(
         CaseStore(args.data), PackRegistry.from_directory(ROOT / "packs"), extractor

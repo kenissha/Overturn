@@ -38,8 +38,9 @@ roles:
     max_tokens: 16000
 
   drafting:
-    # Reads the argument plan only, never a document. Optional polish over a letter the
-    # engine has already assembled.
+    # Reserved. No code path calls this role today: the appeal is assembled by the engine
+    # from the argument plan, sentence by sentence, with no model (docs/decisions.md). If
+    # model polish is added, it reads the argument plan only, never a document.
     bedrock: anthropic.claude-opus-5
     anthropic: claude-opus-5
     ollama: llama3.1

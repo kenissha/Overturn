@@ -33,7 +33,14 @@ from overturn.ledger.errors import (
     UnknownField,
 )
 from overturn.ledger.fields import FieldOrigin, get_field
-from overturn.ledger.schema import Case, Fact, FactStatus, FactValue, Provenance
+from overturn.ledger.schema import (
+    Case,
+    ConflictSource,
+    Fact,
+    FactStatus,
+    FactValue,
+    Provenance,
+)
 from overturn.ledger.store import CaseStore
 from overturn.tools.quoting import coerce_value, locate_quote
 
@@ -45,6 +52,10 @@ class ProvenanceNotVerified(LedgerError):
     the document showed it was not where the model said it was. A fact is only as good as
     a citation that survives being followed.
     """
+
+
+class SettledByPerson(LedgerError):
+    """A person has confirmed or stated this field. A document does not overwrite that."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -123,6 +134,7 @@ class LedgerWriter:
                 quote=quote,
                 confidence=confidence,
             )
+            fact = _reconcile(self.case.fact(field), fact, self.actor)
             self.store.put_fact(self.case, fact)
         except LedgerError as exc:
             return self._refuse(field, exc, value=value)
@@ -135,9 +147,19 @@ class LedgerWriter:
             actor=self.actor,
             field=field,
             outcome="accepted",
-            detail=f"{doc_id} p{page} [{char_span_start}:{char_span_end}]",
+            detail=f"{doc_id} p{page} [{char_span_start}:{char_span_end}]"
+            + (
+                " (conflicts with another document)" if fact.status is FactStatus.CONFLICTED else ""
+            ),
             value=value,
         )
+        if fact.status is FactStatus.CONFLICTED:
+            return WriteResult(
+                True,
+                field,
+                f"Recorded {field} as conflicted: another document on this case states a "
+                "different value. A person decides which reading stands.",
+            )
         return WriteResult(True, field, f"Recorded {field} with source {doc_id} page {page}.")
 
     def mark_missing(self, field: str, reason: str) -> WriteResult:
@@ -154,6 +176,24 @@ class LedgerWriter:
             self._check_writable(field)
             if not reason or not reason.strip():
                 raise ValueError("mark_missing requires a reason")
+            existing = self.case.fact(field)
+            if existing is not None and (
+                existing.is_known or existing.status is FactStatus.CONFLICTED
+            ):
+                # One document being silent does not erase what another states.
+                self.store.record_write(
+                    self.case.case_id,
+                    actor=self.actor,
+                    field=field,
+                    outcome="accepted",
+                    detail=f"not stated here; kept the value already recorded ({reason})",
+                )
+                return WriteResult(
+                    True,
+                    field,
+                    f"{field} is not stated in this document; the value already recorded "
+                    "from another source was kept.",
+                )
             fact = Fact(
                 field=field,
                 value=None,
@@ -319,6 +359,54 @@ class LedgerWriter:
             value=value,
         )
         return WriteResult(False, field, f"Refused: {exc}", error_type=error_type)
+
+
+_PERSON_STATUSES = (FactStatus.HUMAN_VERIFIED, FactStatus.HUMAN_ANSWERED)
+
+
+def _reconcile(existing: Fact | None, new: Fact, actor: str) -> Fact:
+    """What to record when a field already has a value.
+
+    Re-reading the same document replaces its own reading. A different document that
+    agrees replaces it too. A different document that disagrees does not win and does not
+    lose: both readings are kept, side by side, as a conflict for a person to decide —
+    often the strongest argument in the file. And nothing a document says overwrites
+    what a person has confirmed or stated.
+    """
+    if existing is None or new.provenance is None:
+        return new
+    if existing.status is FactStatus.CONFLICTED:
+        return _conflict(list(existing.conflict), new, actor)
+    if existing.status in _PERSON_STATUSES:
+        other_document = (
+            existing.provenance is not None and existing.provenance.doc_id != new.provenance.doc_id
+        )
+        if other_document and existing.value != new.value:
+            side = ConflictSource(reads=existing.value, provenance=existing.provenance)
+            return _conflict([side], new, actor)
+        raise SettledByPerson(
+            f"{new.field} was settled by {existing.verified_by}; a document does not "
+            "overwrite a person's answer. Nothing was changed."
+        )
+    if existing.status is not FactStatus.EXTRACTED or existing.provenance is None:
+        return new
+    if existing.provenance.doc_id == new.provenance.doc_id or existing.value == new.value:
+        return new
+    side = ConflictSource(reads=existing.value, provenance=existing.provenance)
+    return _conflict([side], new, actor)
+
+
+def _conflict(sides: list[ConflictSource], new: Fact, actor: str) -> Fact:
+    incoming = ConflictSource(reads=new.value, provenance=new.provenance)
+    if incoming not in sides:
+        sides.append(incoming)
+    return Fact(
+        field=new.field,
+        value=None,
+        status=FactStatus.CONFLICTED,
+        conflict=sides,
+        recorded_by=actor,
+    )
 
 
 _ORIGIN_EXPLANATION = {

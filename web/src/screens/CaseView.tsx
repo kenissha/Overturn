@@ -143,9 +143,9 @@ export function CaseView({
       ) : (
         <div className="split">
           <div className="pane pane-doc">
-            {data.documents.length > 1 && (
-              <div className="doc-tabs">
-                {data.documents.map((d) => (
+            <div className="doc-tabs">
+              {data.documents.length > 1 &&
+                data.documents.map((d) => (
                   <button
                     key={d.doc_id}
                     className={d.doc_id === docId ? "on" : "quiet-btn"}
@@ -154,8 +154,16 @@ export function CaseView({
                     {d.filename}
                   </button>
                 ))}
-              </div>
-            )}
+              <AddDocument
+                busy={busy}
+                onAdd={(file, kind) =>
+                  act(async () => {
+                    await api.upload(caseId, file, kind);
+                    return (await api.process(caseId)).case;
+                  })
+                }
+              />
+            </div>
             {current ? (
               <DocumentPane document={current} spans={spans} active={active} onHover={hover} />
             ) : (
@@ -184,5 +192,40 @@ export function CaseView({
         </div>
       )}
     </div>
+  );
+}
+
+const DOCUMENT_KINDS: [string, string][] = [
+  ["plan_document", "Plan document (read for what it covers)"],
+  ["denial_letter", "Another denial letter"],
+  ["supporting", "Supporting record (kept on file, not read)"],
+];
+
+// A second source is how contradictions surface: a plan document that covers what the
+// denial calls excluded is recorded as a conflict with both quotes, never silently resolved.
+function AddDocument({ busy, onAdd }: { busy: boolean; onAdd: (file: File, kind: string) => void }) {
+  const [kind, setKind] = useState(DOCUMENT_KINDS[0][0]);
+  return (
+    <label className="add-doc">
+      <select value={kind} disabled={busy} onChange={(e) => setKind(e.target.value)}>
+        {DOCUMENT_KINDS.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <span className="quiet-btn">Add a document</span>
+      <input
+        type="file"
+        accept=".pdf,.txt"
+        hidden
+        disabled={busy}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onAdd(file, kind);
+          e.target.value = "";
+        }}
+      />
+    </label>
   );
 }

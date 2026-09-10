@@ -45,6 +45,8 @@ class Readiness:
 
     fact_gaps: tuple[FactGap, ...]
     unverified_critical_facts: tuple[str, ...]
+    noted_conflicts: tuple[FactGap, ...] = ()
+    """Disagreements on facts the pack does not require: surfaced, not blocking."""
 
     @property
     def human_only_gaps(self) -> tuple[EvidenceItem, ...]:
@@ -167,11 +169,23 @@ def assess(case: Case, pack: RulePack) -> Readiness:
     # decision is final moves the whole case to external review and changes every
     # deadline. Found by the red-team suite, where a planted 'final determination'
     # line was recorded with a genuine citation and nobody was asked to check it.
+    noted: list[FactGap] = []
     for name, fact in case.facts.items():
         if name in unverified or name in pack.required_facts:
             continue
         if fact.spec.is_critical and fact.status is FactStatus.EXTRACTED:
             unverified.append(name)
+        elif fact.status is FactStatus.CONFLICTED:
+            noted.append(
+                FactGap(
+                    field=name,
+                    status=fact.status,
+                    reason=(
+                        "Two documents disagree. The appeal can proceed, and the "
+                        "contradiction may be its strongest argument."
+                    ),
+                )
+            )
 
     return Readiness(
         pack=pack,
@@ -180,4 +194,5 @@ def assess(case: Case, pack: RulePack) -> Readiness:
         missing_optional_evidence=tuple(missing_optional),
         fact_gaps=tuple(fact_gaps),
         unverified_critical_facts=tuple(unverified),
+        noted_conflicts=tuple(noted),
     )

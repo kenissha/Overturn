@@ -43,6 +43,59 @@ SEED_PERSON = "demo-seed"
 ATTENTION_TAGS = ("multi_reason", "out_of_scope", "fact_poisoning", "no_notice_date", "injection")
 """Letters left exactly as read, because each shows something a person must see."""
 
+CONFLICT_DENIAL = (
+    "Harborline Health Plan\nMember Services Department\n\n"
+    "Date of notice: September 2, 2026\nMember: Grace Novak\nMember ID: H42-518203\n\n"
+    "NOTICE OF ADVERSE BENEFIT DETERMINATION\n\n"
+    "This notice concerns a claim for services already provided.\n"
+    "Service: MRI of the lumbar spine without contrast\nProcedure code: 72148\n"
+    "Date of service: August 20, 2026\nProvider: Dr. Lena Ortiz\n\n"
+    "Reason for the decision\n"
+    "We have denied this request because the service was determined not medically "
+    "necessary, and imaging of this kind is excluded from coverage under Section 4.2(b) "
+    "of your plan documents.\n\n"
+    "Your right to appeal\n"
+    "If you disagree with this decision, you may request an internal appeal within 180 "
+    "days of receiving this notice.\n"
+)
+CONFLICT_POLICY = (
+    "HARBORLINE HEALTH PLAN\nEvidence of Coverage, 2026 (excerpt)\n\n"
+    "Section 4.2 Diagnostic imaging\n"
+    "(a) Imaging requires a referral from the member's treating physician.\n"
+    "(b) Covered: magnetic resonance imaging (MRI), including imaging of the spine, when "
+    "ordered by the treating physician for a condition under active treatment.\n\n"
+    "Section 4.3 Exclusions\n"
+    "Imaging performed solely for screening purposes is not covered.\n"
+)
+CONFLICT_ANSWERS: dict[str, dict[str, tuple | None]] = {
+    CONFLICT_DENIAL: {
+        "denial.notice_date": ("2026-09-02", "September 2, 2026"),
+        "denial.reason_text": (
+            "the service was determined not medically necessary",
+            "the service was determined not medically necessary",
+        ),
+        "denial.cited_policy_section": ("Section 4.2(b)", "Section 4.2(b)"),
+        "service.description": (
+            "MRI of the lumbar spine without contrast",
+            "MRI of the lumbar spine without contrast",
+        ),
+        "service.cpt_codes": (["72148"], "72148"),
+        "service.date_of_service": ("2026-08-20", "August 20, 2026"),
+        "service.is_pre_service": (False, "claim for services already provided"),
+        "plan.issuer": ("Harborline Health Plan", "Harborline Health Plan"),
+        "patient.member_id": ("H42-518203", "H42-518203"),
+        "provider.name": ("Dr. Lena Ortiz", "Dr. Lena Ortiz"),
+        "plan.covers_service": (False, "excluded from coverage"),
+    },
+    CONFLICT_POLICY: {
+        "plan.issuer": ("Harborline Health Plan", "HARBORLINE HEALTH PLAN"),
+        "plan.covers_service": (True, "Covered: magnetic resonance imaging (MRI)"),
+    },
+}
+"""A hand-written pair for the demo: the denial says the service is excluded, the plan's
+own evidence of coverage says it is covered. Written, like the corpus, from an answer
+key rather than by a model."""
+
 
 class AnswerKeyExtractor:
     """Writes a corpus letter's answer key by quoting it. Not a model; says so in the audit."""
@@ -53,7 +106,23 @@ class AnswerKeyExtractor:
     def __call__(self, inp: ExtractionInput, writer: LedgerWriter) -> None:
         sample = self._by_text.get(tuple(inp.pages))
         if sample is None:
-            return  # not a corpus letter: leave it unread rather than pretend
+            crafted = next(
+                (
+                    a
+                    for text, a in CONFLICT_ANSWERS.items()
+                    if (normalise(text),) == tuple(inp.pages)
+                ),
+                None,
+            )
+            if crafted is None:
+                return  # not a known letter: leave it unread rather than pretend
+            for name in inp.fields:
+                answer = crafted.get(name)
+                if answer is None:
+                    writer.mark_missing(name, "The document does not state this.")
+                else:
+                    writer.write_fact_by_quote(name, answer[0], inp.doc_id, 1, answer[1], 1.0)
+            return
         for name in inp.fields:
             gold = sample.gold.get(name)
             if gold is None:
@@ -119,6 +188,22 @@ def seed(data_dir: Path, *, today: date, reset: bool = False, keep_clean: int = 
                         case_id, today - timedelta(days=1 + clean % 5), by=SEED_PERSON, today=today
                     )
         states[snapshot.case.state.value] += 1
+
+    # One file where two documents disagree about coverage.
+    case_id = store.create().case_id
+    pipeline.ingest(
+        case_id,
+        filename="denial_harborline_mri.txt",
+        kind="denial_letter",
+        raw_pages=[CONFLICT_DENIAL],
+    )
+    pipeline.ingest(
+        case_id,
+        filename="harborline_evidence_of_coverage.txt",
+        kind="plan_document",
+        raw_pages=[CONFLICT_POLICY],
+    )
+    states[pipeline.process(case_id, today=today).case.state.value] += 1
     return states
 
 

@@ -297,7 +297,9 @@ def _pages_from_upload(filename: str, raw: bytes) -> list[str]:
 def app_from_env() -> FastAPI:
     """Application factory for uvicorn, configured from the environment."""
     from overturn.agents.factory import extractor_from_env
+    from overturn.telemetry import setup_from_env
 
+    setup_from_env()
     extractor = extractor_from_env()
     fixed = os.environ.get("OVERTURN_TODAY")
     clock = (lambda: date.fromisoformat(fixed)) if fixed else None

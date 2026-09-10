@@ -25,7 +25,7 @@ from overturn.engine.escalation import evaluate as run_gate
 from overturn.engine.evidence import Readiness, assess
 from overturn.engine.packs import PackRegistry, RulePack
 from overturn.engine.rules import Classification, classify
-from overturn.extraction import DEFAULT_FIELDS, ExtractionInput, Extractor
+from overturn.extraction import DEFAULT_FIELDS, FIELDS_BY_KIND, ExtractionInput, Extractor
 from overturn.ledger.documents import DocumentText
 from overturn.ledger.fields import FieldOrigin, get_field
 from overturn.ledger.schema import (
@@ -41,14 +41,16 @@ from overturn.ledger.schema import (
     utcnow,
 )
 from overturn.ledger.store import CaseStore, new_doc_id
+from overturn.telemetry import traced
 from overturn.tools.ledger_tools import LedgerWriter
 from overturn.tools.quoting import coerce_value
 
 SYSTEM_ACTOR = "Pipeline@v1"
 
-EXTRACTED_KINDS = frozenset({"denial_letter"})
-"""Document kinds the extraction agent reads. Supporting documents — a physician's letter,
-clinical notes — are recorded as evidence on file, not mined for denial facts."""
+EXTRACTED_KINDS = frozenset(FIELDS_BY_KIND)
+"""Document kinds the extraction agent reads: denial letters, and plan documents for what
+the plan says it covers. Supporting documents — a physician's letter, clinical notes —
+are recorded as evidence on file, not mined for facts."""
 
 PERSON_ONLY_STATES = frozenset(
     {
@@ -111,6 +113,7 @@ class Pipeline:
 
     # -- documents -----------------------------------------------------------------
 
+    @traced("overturn.ingest")
     def ingest(
         self,
         case_id: str,
@@ -170,6 +173,7 @@ class Pipeline:
 
     # -- extraction ----------------------------------------------------------------
 
+    @traced("overturn.extract")
     def extract(self, case_id: str, doc_id: str) -> None:
         """Hand one document to the extractor, bound to that document alone."""
         if self.extractor is None:
@@ -177,7 +181,10 @@ class Pipeline:
         case = self.store.load(case_id)
         text = self.document_text(case_id, doc_id)
         writer = LedgerWriter(self.store, case, actor=self.extractor_actor, texts={doc_id: text})
-        self.extractor(ExtractionInput(doc_id=doc_id, pages=text.pages, fields=self.fields), writer)
+        self.extractor(
+            ExtractionInput(doc_id=doc_id, pages=text.pages, fields=self._fields_for(case, doc_id)),
+            writer,
+        )
         self.store.mark_extracted(case_id, doc_id)
 
     def extract_pending(self, case_id: str) -> int:
@@ -188,6 +195,7 @@ class Pipeline:
 
     # -- evaluation ----------------------------------------------------------------
 
+    @traced("overturn.evaluate")
     def evaluate(self, case_id: str, *, today: date | None = None) -> CaseSnapshot:
         """Run the deterministic layer over the ledger. No model, no documents read."""
         case = self.store.load(case_id)
@@ -253,6 +261,7 @@ class Pipeline:
 
     # -- people --------------------------------------------------------------------
 
+    @traced("overturn.answer")
     def answer(
         self, case_id: str, esc_id: str, answer: str, *, by: str, today: date | None = None
     ) -> CaseSnapshot:
@@ -295,6 +304,7 @@ class Pipeline:
         """A person records that a required document is now on file."""
         return self.state_fact(case_id, f"evidence.{evidence_id}", True, by=by, today=today)
 
+    @traced("overturn.mark_filed")
     def mark_filed(
         self, case_id: str, filed_on: date, *, by: str, today: date | None = None
     ) -> CaseSnapshot:
@@ -324,6 +334,7 @@ class Pipeline:
         self.store.save(case)
         return self.evaluate(case_id, today=today)
 
+    @traced("overturn.record_decision")
     def record_decision(
         self,
         case_id: str,
@@ -372,6 +383,12 @@ class Pipeline:
         return self.evaluate(case_id, today=today)
 
     # -- internals -----------------------------------------------------------------
+
+    def _fields_for(self, case: Case, doc_id: str) -> tuple[str, ...]:
+        document = case.document(doc_id)
+        if document is None or document.kind == "denial_letter":
+            return self.fields
+        return FIELDS_BY_KIND.get(document.kind, ())
 
     def _apply(self, case: Case, escalation: Escalation, answer: str, by: str) -> None:
         """Turn an answer into ledger state, where the answer settles something."""

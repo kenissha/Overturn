@@ -310,7 +310,7 @@ def _judgment_escalations(
         )
 
     if readiness is not None:
-        for gap in readiness.conflicts:
+        for gap in (*readiness.conflicts, *readiness.noted_conflicts):
             out.append(
                 Escalation(
                     escalation_id=escalation_id(
@@ -327,7 +327,7 @@ def _judgment_escalations(
                         "The contradiction may itself be the strongest argument in the "
                         "file, but the appeal has to take a position on it."
                     ),
-                    blocking=True,
+                    blocking=gap in readiness.conflicts,
                     detail=gap.reason,
                 )
             )

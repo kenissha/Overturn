@@ -140,7 +140,10 @@ tr:last-child td { border-bottom: 0; }
 @media (max-width: 1280px) { .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .escalations { grid-column: 1 / -1; order: -1; } }
 @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
 .pane { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; max-height: calc(100vh - 250px); overflow: auto; }
-.doc-tabs { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); }
+.doc-tabs { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); flex-wrap: wrap; align-items: center; }
+.add-doc { margin-left: auto; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.add-doc select { font: inherit; font-size: 12px; }
+.add-doc .quiet-btn { padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; }
 
 .document { padding: 8px 0; }
 .page { padding: 14px 22px 22px; border-bottom: 1px solid var(--line); }

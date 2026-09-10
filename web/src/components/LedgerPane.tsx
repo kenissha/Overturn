@@ -94,8 +94,20 @@ function FactRow({
               {side.provenance && (
                 <span className="source">
                   {side.provenance.doc_id} p.{side.provenance.page}
+                  {side.provenance.quote && (
+                    <>
+                      {" "}· <q>{side.provenance.quote}</q>
+                    </>
+                  )}
                 </span>
               )}
+              <button
+                className="quiet-btn"
+                disabled={busy}
+                onClick={() => onState(fact.field, side.reads)}
+              >
+                Proceed on this reading
+              </button>
             </div>
           ))}
         </div>

@@ -26,9 +26,24 @@ DEFAULT_FIELDS: tuple[str, ...] = (
     "plan.issuer",
     "patient.member_id",
     "provider.name",
+    "plan.covers_service",
 )
 """The fields read from a denial letter. Every one is document-origin: deadlines and
 judgment calls are never asked of an extractor."""
+
+POLICY_FIELDS: tuple[str, ...] = (
+    "plan.issuer",
+    "plan.name",
+    "plan.type",
+    "plan.covers_service",
+)
+"""The fields read from a plan document: who issues it and what it says it covers."""
+
+FIELDS_BY_KIND: dict[str, tuple[str, ...]] = {
+    "denial_letter": DEFAULT_FIELDS,
+    "plan_document": POLICY_FIELDS,
+}
+"""Document kinds the extraction agent reads, and what it reads each for."""
 
 
 @dataclass(frozen=True, slots=True)
