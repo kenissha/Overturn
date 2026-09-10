@@ -152,3 +152,10 @@ match:
 """
     with pytest.raises(PackValidationError):
         load_pack(write_pack(tmp_path, body))
+
+
+def test_a_claim_interpolating_an_unknown_field_is_rejected(tmp_path):
+    """A template with a hole the ledger can never fill fails at load, not in a letter."""
+    body = BASE.replace('claim: "Opening."', 'claim: "Opening {denial.invented_field}."')
+    with pytest.raises(PackValidationError, match="interpolates"):
+        load_pack(write_pack(tmp_path, body))

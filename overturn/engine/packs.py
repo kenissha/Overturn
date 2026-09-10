@@ -14,6 +14,7 @@ the status or value it must have, and is checked by the code in this module.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import yaml
@@ -117,6 +118,17 @@ class ArgumentStep(BaseModel):
     """When set, the step is only included if the condition holds."""
 
 
+PLACEHOLDER = re.compile(r"\{([a-z_]+(?:\.[a-z_]+)+)\}")
+
+
+def placeholders(text: str) -> tuple[str, ...]:
+    """Field names a claim template interpolates, in order of first appearance."""
+    seen: dict[str, None] = {}
+    for match in PLACEHOLDER.finditer(text):
+        seen.setdefault(match.group(1), None)
+    return tuple(seen)
+
+
 class RulePack(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -202,6 +214,12 @@ def _check_internal_references(pack: RulePack, filename: str) -> None:
             raise PackValidationError(
                 f"{filename}: argument step {step.id!r} has a condition on "
                 f"{step.condition.fact!r}, which is not in the taxonomy."
+            )
+        unknown_placeholders = [f for f in placeholders(step.claim) if get_field(f) is None]
+        if unknown_placeholders:
+            raise PackValidationError(
+                f"{filename}: argument step {step.id!r} interpolates "
+                f"{unknown_placeholders}, which are not in the taxonomy."
             )
 
     if pack.deadline_regime not in _ALLOWED_REGIMES:
