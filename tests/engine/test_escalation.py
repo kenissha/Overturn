@@ -340,3 +340,28 @@ def test_a_filed_appeal_meets_its_filing_deadline(registry, pack):
     result = gate(case, registry, pack, today=date(2027, 1, 24))
     assert result.by_trigger(Trigger.DEADLINE_PRESSURE) == ()
     assert any("recorded as filed" in line for line in result.silent)
+
+
+def test_deadlines_are_named_plainly(registry, pack):
+    asked = gate(ready_case(pack), registry, pack, today=date(2027, 1, 24)).by_trigger(
+        Trigger.DEADLINE_PRESSURE
+    )
+    assert asked[0].question.startswith("The internal appeal deadline is 4 day(s) away")
+
+
+def test_the_plans_response_clock_asks_about_the_plan_not_the_filing(registry, pack):
+    """After filing, the question is whether the plan answered, not whether to file."""
+    case = ready_case(pack)
+    case.facts["appeal.filed_date"] = Fact(
+        field="appeal.filed_date",
+        value="2026-09-01",
+        status=FactStatus.HUMAN_ANSWERED,
+        verified_by="user_004",
+        recorded_by="user_004",
+    )
+    asked = gate(case, registry, pack, today=date(2026, 10, 27)).by_trigger(
+        Trigger.DEADLINE_PRESSURE
+    )
+    assert len(asked) == 1  # the filing window is met; only the plan's clock remains
+    assert "Has it arrived" in asked[0].question
+    assert "Decision received" in asked[0].options

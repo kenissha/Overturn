@@ -184,10 +184,19 @@ def _deadline_escalations(
                 "this the earliest possible deadline rather than the exact one."
             )
 
-        if pressure is Pressure.EXPIRED:
+        if deadline.field == "deadline.plan_response_due":
+            # After filing, the clock that matters is the plan's, not the advocate's.
+            question = f"The plan's decision is due {_when(remaining)}. Has it arrived?"
+            why = (
+                "A plan that misses its own response deadline may be treated as having "
+                "exhausted its internal process, which can open external review without "
+                "further waiting. Worth checking against the plan's terms. " + basis_note
+            )
+            options = ("Decision received", "Still waiting")
+        elif pressure is Pressure.EXPIRED:
             question = (
-                f"The window for {_human(deadline.field)} closed {abs(remaining)} day(s) "
-                "ago. How should this case proceed?"
+                f"{_deadline_name(deadline.field).capitalize()} passed "
+                f"{abs(remaining)} day(s) ago. How should this case proceed?"
             )
             why = (
                 "Filing after the window usually ends the internal route, but a stated "
@@ -196,8 +205,8 @@ def _deadline_escalations(
             options = ("File anyway", "Move to external review", "Close the case")
         else:
             question = (
-                f"{_human(deadline.field)} is {remaining} day(s) away. Is this case on "
-                "track to be filed?"
+                f"{_deadline_name(deadline.field).capitalize()} is {remaining} day(s) "
+                "away. Is this case on track to be filed?"
             )
             why = (
                 "This is the deadline the whole file depends on; missing it ends the "
@@ -455,6 +464,23 @@ def _anomaly_escalations(
             )
         )
     return out
+
+
+_DEADLINE_NAMES = {
+    "deadline.internal_appeal_due": "the internal appeal deadline",
+    "deadline.external_review_due": "the external review deadline",
+    "deadline.plan_response_due": "the plan's response deadline",
+}
+
+
+def _deadline_name(field_name: str) -> str:
+    return _DEADLINE_NAMES.get(field_name, _human(field_name))
+
+
+def _when(days: int) -> str:
+    if days > 0:
+        return f"in {days} day(s)"
+    return "today" if days == 0 else f"{-days} day(s) ago"
 
 
 def _human(field_name: str) -> str:
