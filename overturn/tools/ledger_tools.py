@@ -23,6 +23,7 @@ without an agent SDK or a model provider installed. The Strands ``@tool`` wrappe
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass
 
 from overturn.ledger.documents import DocumentText, quotes_match
@@ -41,7 +42,7 @@ from overturn.ledger.schema import (
     FactValue,
     Provenance,
 )
-from overturn.ledger.store import CaseStore
+from overturn.ledger.store import CaseStore, _serialised
 from overturn.tools.quoting import coerce_value, locate_quote
 
 
@@ -93,9 +94,12 @@ class LedgerWriter:
         self.actor = actor
         self.texts = texts
         self.allowed_origins = allowed_origins
+        # One agent, several tool calls at once: the ledger settles them one at a time.
+        self._lock = threading.RLock()
 
     # -- tools --------------------------------------------------------------------
 
+    @_serialised
     def write_fact(
         self,
         field: str,
@@ -162,6 +166,7 @@ class LedgerWriter:
             )
         return WriteResult(True, field, f"Recorded {field} with source {doc_id} page {page}.")
 
+    @_serialised
     def mark_missing(self, field: str, reason: str) -> WriteResult:
         """Record that this document does not establish a field.
 
@@ -217,6 +222,7 @@ class LedgerWriter:
         )
         return WriteResult(True, field, f"Recorded {field} as missing.")
 
+    @_serialised
     def write_fact_by_quote(
         self,
         field: str,

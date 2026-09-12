@@ -17,10 +17,12 @@ and shape only, never by value.
 
 from __future__ import annotations
 
+import functools
 import json
 import os
 import secrets
 import tempfile
+import threading
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -28,6 +30,25 @@ from typing import Any
 from overturn.ledger.errors import DocumentNotFound
 from overturn.ledger.fields import get_field
 from overturn.ledger.schema import Case, Fact, utcnow
+
+
+def _serialised(method):
+    """Run this method under the object's lock.
+
+    A real model issues several tool calls at once, and Strands runs them in parallel
+    threads. Two writes landing in the same audit file at the same moment used to
+    interleave mid-line and leave the log unreadable; two writes to the same field could
+    each read the ledger before the other had written to it. Every path that changes a
+    case is serialised here instead of being made thread-safe one call at a time.
+    """
+
+    @functools.wraps(method)
+    def inner(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+
+    return inner
+
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
@@ -64,6 +85,7 @@ class CaseStore:
         self.audit_dir = self.root / "audit"
         self.cases_dir.mkdir(parents=True, exist_ok=True)
         self.audit_dir.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.RLock()
 
     # -- cases --------------------------------------------------------------------
 
@@ -85,6 +107,7 @@ class CaseStore:
             raise FileNotFoundError(f"No such case: {case_id}")
         return Case.model_validate_json(path.read_text(encoding="utf-8"))
 
+    @_serialised
     def save(self, case: Case) -> None:
         case.updated_at = utcnow()
         _atomic_write(
@@ -101,6 +124,7 @@ class CaseStore:
         _reject_traversal(case_id)
         return self.audit_dir / f"{case_id}.jsonl"
 
+    @_serialised
     def record_write(
         self,
         case_id: str,
@@ -191,6 +215,7 @@ class CaseStore:
 
     # -- writes -------------------------------------------------------------------
 
+    @_serialised
     def put_fact(self, case: Case, fact: Fact) -> None:
         """Attach a validated fact to a case, checking that its source exists.
 
