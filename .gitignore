@@ -35,3 +35,7 @@ OVERTURN.md
 
 # Kisisel cekim notu, repoya girmez
 CEKIM-REHBERI.md
+
+# Ham video kayitlari repoya girmez
+*.mp4
+*.mkv

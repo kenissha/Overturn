@@ -10,6 +10,8 @@ AWS Agents for Humans Hackathon · Good Neighbor Agents track · MIT licensed
 > fact with the source it came from, tracks appeal deadlines deterministically, and
 > surfaces to a human only when a real human decision is required.
 
+**[Watch the demo (4:40)](https://www.youtube.com/watch?v=nPa7xJMWxdE)**
+
 ---
 
 ## The problem

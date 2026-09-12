@@ -123,7 +123,7 @@ FastAPI · React · TypeScript · Vite · OpenTelemetry
 ## Links
 
 - Repository (MIT): https://github.com/kenissha/Overturn
-- Demo video: *to add*
+- Demo video (4:40): https://www.youtube.com/watch?v=nPa7xJMWxdE
 - Articles on builder.aws:
   - Solving prompt injection with permissions, not prompts: https://builder.aws.com/content/3JEIG7BsbHmltHiJGpvPAdImxsh/agents-for-humans-solving-prompt-injection-with-permissions-not-prompts
   - Designing an agent for an advocate carrying forty files: https://builder.aws.com/content/3JEJZjGBudaLVx99JpGPi0a3GXH/agents-for-humans-designing-an-agent-for-an-advocate-carrying-forty-files
