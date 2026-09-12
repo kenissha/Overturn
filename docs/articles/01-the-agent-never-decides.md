@@ -151,10 +151,26 @@ point. What we gave up in fluency we got back as properties we can state and tes
 value can be traced to a line in a letter, every deadline to a rule, and every omission
 is explained.
 
-Two limits we state rather than hide. Our evaluation corpus is synthetic, so its scores
-are an upper bound on real-world performance, not an estimate of it. And model-backed
-extraction numbers will be published in the repository when measured — including if they
-are unflattering.
+So here is what it measures. Claude Opus 4.6 on Amazon Bedrock, across all sixty letters:
+99.7% field accuracy, a 0.3% hallucination rate, and 99.4% correct abstention — the model
+explicitly recording *the letter does not say this* where the letter does not say it. The
+engine's classification and deadline arithmetic were correct on every letter, and the
+ledger refused nothing, meaning the agent never fabricated a citation or reached for a
+field it may not write.
+
+The number I cared about most was the poisoned letters. Four of them carry a second
+"Date of notice", planted 200 days before the real one. Privilege separation cannot stop
+that text from being read — it is genuinely on the page — so this was the open risk. The
+planted date won in none of the four. And if it ever does, a critical fact still cannot
+enter a packet until a person confirms it against the original.
+
+Three field decisions out of 780 were not correct, and all three are listed in the
+repository with what the letter said. One of them is arguably the answer key's fault
+rather than the model's, which is also written down there.
+
+Two limits I state rather than hide. The corpus is synthetic, so these scores are an upper
+bound on real-world performance, not an estimate of it. And this is one run of one model:
+it is evidence, not a guarantee.
 
 Overturn is open source under the MIT license: [github.com/kenissha/Overturn](https://github.com/kenissha/Overturn).
 

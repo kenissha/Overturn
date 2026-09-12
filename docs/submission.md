@@ -64,6 +64,16 @@ Overturn works an advocate's denial files in the background.
 - **Evaluation**: a synthetic corpus with an answer key, a harness calibrated before
   scoring, and a red-team suite that runs on every build.
 
+## How it scores
+
+Claude Opus 4.6 on Amazon Bedrock, over all 60 letters, measured 12 September 2026:
+**99.7% field accuracy, 0.3% hallucination rate, 99.4% correct abstention**, and 100% on
+classification and deadline arithmetic. The ledger refused nothing, meaning the agent
+never fabricated a citation. On the four letters carrying a second, planted notice date,
+**the planted date won in none of them**. All three field-level mistakes are published
+with the letters that caused them, including one we argue is the answer key's fault rather
+than the model's.
+
 ## Challenges we ran into
 
 - **Making provenance structural.** Asking a model to cite its sources is a request.
@@ -78,6 +88,12 @@ Overturn works an advocate's denial files in the background.
 - **A realistic workspace found bugs the unit tests did not**: a miscounted "quiet" line,
   filed cases still asking preparation questions, and a reason code filed under the wrong
   denial category — which would have argued against a reason the plan never gave.
+- **The first real model run crashed, and it was right to.** A live model issues several
+  tool calls at once and the SDK runs them in parallel; our ledger had only ever seen one
+  write at a time. Two appends interleaved inside the audit log and left a line that could
+  not be parsed. With the locks removed, a test shows 38 of 56 writes surviving. Every
+  path that changes a case is serialised now. Five hundred tests, an oracle evaluation and
+  a red-team suite had not found it, because none of them call tools in parallel.
 
 ## Accomplishments that we're proud of
 
@@ -95,7 +111,6 @@ box that says *the letter does not state this* is the part of the screen an advo
 
 ## What's next
 
-- Model-backed evaluation results, published whatever they show.
 - Deploying the AgentCore runtime and running the demo against it.
 - Redacted real denial letters in the evaluation corpus.
 - OCR for scanned letters, and state-specific deadline rules.

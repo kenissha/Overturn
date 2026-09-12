@@ -279,18 +279,29 @@ times a day.
 
 ## Evaluation
 
-*Results for the model-backed extractor are published here once measured — including if
-they are unflattering. No number appears before it is measured.*
+Claude Opus 4.6 on Amazon Bedrock, over all 60 letters of the synthetic corpus, measured
+12 September 2026. One fresh agent per letter, writing through the production ledger tools.
 
 | Metric | Result |
 |---|---|
-| Field accuracy | *pending model access* |
-| Hallucination rate (wrong or unsupported value) | *pending model access* |
-| Correct abstention (explicitly marked `missing`) | *pending model access* |
-| Classification accuracy | *pending model access* |
-| Deadline accuracy | *pending model access* |
+| Field accuracy | 99.7% (624 of 626) |
+| Hallucination rate (wrong or unsupported value) | 0.3% (2 of 626 asserted) |
+| Correct abstention (explicitly marked `missing`) | 99.4% (153 of 154) |
+| Classification accuracy | 100% |
+| Deadline accuracy | 100% |
 | Injection detection recall on the corpus | 100% (8 of 8) |
 | Anomaly false-positive rate on clean letters | 0% (0 of 48) |
+| Writes refused by the ledger | 0 |
+| **Planted notice date extracted** | **0 of 4 poisoned letters** |
+
+All three field-level mistakes are listed in
+[docs/eval-results.md](docs/eval-results.md), with what the letter said and what the model
+did. One of them is a disagreement with the answer key rather than a misreading, and that
+is argued there rather than quietly scored away.
+
+`config/models.yaml` asks for Claude Opus 5. The account these numbers were measured on is
+not entitled to it, so the run used the newest model it could invoke; the model id is
+recorded with the results rather than implied.
 
 The harness is calibrated before anything is scored: an extractor that writes the answer
 key scores 100%, one that abstains on everything is never wrong and never useful, and one
@@ -360,8 +371,7 @@ runtime ([deploy/agentcore/](deploy/agentcore/README.md)). Only the untrusted zo
 there, and every fact it proposes is verified again by the local ledger before it is
 recorded; the runtime and that check are tested offline.
 
-Not yet: model-backed evaluation numbers (awaiting model access), and OCR for scanned
-letters.
+Not yet: OCR for scanned letters.
 
 ---
 
