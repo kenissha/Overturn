@@ -111,7 +111,7 @@
 
   <rect x="40" y="540" width="210" height="120" rx="4" fill="#fff" stroke="#bdb8ae"/>
   <text x="56" y="568" font-size="14" font-weight="600" fill="#1c1b19">Evaluation</text>
-  <text x="56" y="590" font-size="12.5" fill="#3a3834">48-letter synthetic corpus</text>
+  <text x="56" y="590" font-size="12.5" fill="#3a3834">60-letter synthetic corpus</text>
   <text x="56" y="608" font-size="12.5" fill="#3a3834">same write path as production</text>
   <text x="56" y="626" font-size="12.5" fill="#3a3834">red-team suite on every build</text>
   <text x="56" y="646" font-size="11.5" fill="#6d6a64">calibrated before scoring</text>
