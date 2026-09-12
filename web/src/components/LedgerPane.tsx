@@ -4,6 +4,7 @@ import { fieldLabel, groupOf, valueText } from "../format";
 
 interface Props {
   ledger: Fact[];
+  docNames: Record<string, string>;
   active: string | null;
   onHover: (key: string | null) => void;
   onConfirm: (field: string) => void;
@@ -14,7 +15,7 @@ interface Props {
 // The right half of the split view. A value is shown with the words it came from; an
 // unknown value is shown as an empty box that says why. Nothing here is ever filled in
 // to look complete.
-export function LedgerPane({ ledger, active, onHover, onConfirm, onState, busy }: Props) {
+export function LedgerPane({ ledger, docNames, active, onHover, onConfirm, onState, busy }: Props) {
   const groups = new Map<string, Fact[]>();
   for (const fact of ledger) {
     const g = groupOf(fact.field);
@@ -30,6 +31,7 @@ export function LedgerPane({ ledger, active, onHover, onConfirm, onState, busy }
             <FactRow
               key={f.field}
               fact={f}
+              docNames={docNames}
               active={active}
               onHover={onHover}
               onConfirm={onConfirm}
@@ -45,6 +47,7 @@ export function LedgerPane({ ledger, active, onHover, onConfirm, onState, busy }
 
 function FactRow({
   fact,
+  docNames,
   active,
   onHover,
   onConfirm,
@@ -52,6 +55,7 @@ function FactRow({
   busy,
 }: {
   fact: Fact;
+  docNames: Record<string, string>;
   active: string | null;
   onHover: (key: string | null) => void;
   onConfirm: (field: string) => void;
@@ -93,7 +97,8 @@ function FactRow({
               <span className="fact-value">{valueText({ kind: fact.kind, value: side.reads })}</span>
               {side.provenance && (
                 <span className="source">
-                  {side.provenance.doc_id} p.{side.provenance.page}
+                  {docNames[side.provenance.doc_id] ?? side.provenance.doc_id} p.
+                  {side.provenance.page}
                   {side.provenance.quote && (
                     <>
                       {" "}· <q>{side.provenance.quote}</q>

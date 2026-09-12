@@ -91,6 +91,8 @@ export function CaseView({
   const issuer = data.ledger.find((f) => f.field === "plan.issuer")?.value as string | undefined;
   const unread = data.state === "INTAKE" && data.ledger.every((f) => f.status === "not_looked_for");
   const current = docId ? texts[docId] : undefined;
+  // A conflict names its sources; a person reads filenames, not internal ids.
+  const docNames = Object.fromEntries(data.documents.map((d) => [d.doc_id, d.filename]));
 
   return (
     <div className="case">
@@ -173,6 +175,7 @@ export function CaseView({
           <div className="pane pane-ledger">
             <LedgerPane
               ledger={data.ledger}
+              docNames={docNames}
               active={active}
               onHover={hover}
               busy={busy}

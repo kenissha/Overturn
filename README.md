@@ -159,6 +159,44 @@ network, coding or billing error, and experimental or investigational treatment.
 - **The draft and the trace** — the appeal with the facts behind each paragraph, and every
   write the agent attempted, including the ones the ledger refused.
 
+### The morning queue
+
+Three cards, because three deadlines have passed and nothing else is more urgent. The line
+underneath counts the rest honestly: what is moving on its own, and what is waiting on the
+advocate.
+
+![The Today screen: three cards, each with a question and why it matters](docs/screenshots/01-today.png)
+
+### The letter and the ledger
+
+Every value carries the words it was read from. A field the letter does not establish is
+an empty box that says so — never a plausible guess.
+
+![A case: the letter on the left, the ledger on the right, the questions beside them](docs/screenshots/02-case.png)
+
+### Two documents that disagree
+
+The denial says the service is excluded; the plan's own evidence of coverage says it is
+covered. Neither reading is discarded, and the advocate decides which one the appeal
+proceeds on.
+
+![A conflicted fact showing both readings with their quotes and sources](docs/screenshots/05-conflict.png)
+
+### Planted instructions
+
+A letter asking that the member not be informed. The agent that read it had no ability to
+act on it; the advocate is told, and shown the text.
+
+![A document anomaly banner and the escalation quoting the planted text](docs/screenshots/03-anomaly.png)
+
+The [draft](docs/screenshots/04-draft.png) and the
+[trace](docs/screenshots/07-trace.png) are the other two views: the appeal with the facts
+behind each paragraph, and every write the agent attempted, refusals included.
+
+*Screenshots are of the demonstration workspace, whose facts are written from the
+evaluation answer key by an actor named `AnswerKey@demo (not a model)`, on a clock pinned
+to October 4, 2026.*
+
 ---
 
 ## Security model
