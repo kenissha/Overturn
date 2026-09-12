@@ -390,6 +390,7 @@ Not yet: OCR for scanned letters.
 
 ## Written up
 
+- [Why our appeal agent never gets to decide](https://builder.aws.com/content/3JEKmDeF6oP5PZrtgd8jKxvIQOL/agents-for-humans-why-our-appeal-agent-never-gets-to-decide)
 - [Solving prompt injection with permissions, not prompts](https://builder.aws.com/content/3JEIG7BsbHmltHiJGpvPAdImxsh/agents-for-humans-solving-prompt-injection-with-permissions-not-prompts)
 - [Designing an agent for an advocate carrying forty files](https://builder.aws.com/content/3JEJZjGBudaLVx99JpGPi0a3GXH/agents-for-humans-designing-an-agent-for-an-advocate-carrying-forty-files)
 
