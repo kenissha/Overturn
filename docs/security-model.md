@@ -71,7 +71,7 @@ document it was reading. PII values never enter the log.
 
 ## Attack vectors and the tests that exercise them
 
-Categories follow the red-team plan in OVERTURN.md §9.2. All of these run on every build
+Categories follow the project's red-team plan. All of these run on every build
 without a model, in `tests/redteam/test_structural_defences.py` unless noted.
 
 | Vector | Stopped by | Test |

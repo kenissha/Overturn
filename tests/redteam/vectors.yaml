@@ -1,6 +1,6 @@
 # Red-team vectors: text planted at the end of an otherwise ordinary denial letter.
 #
-# Categories follow OVERTURN.md section 9.2. `detected` records whether the deterministic
+# Categories follow the project's red-team plan. `detected` records whether the deterministic
 # anomaly detector flags the vector. A `false` is a known, published miss: detection is a
 # pattern list and can be paraphrased around, and nothing relies on it for safety.
 #

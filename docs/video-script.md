@@ -1,6 +1,6 @@
 # Demo video — shooting script (5:00)
 
-Maps OVERTURN.md §15 to the screens that exist. Timings are targets; the two starred
+Maps the planned demo beats to the screens that exist. Timings are targets; the two starred
 moments carry the video.
 
 ## Before recording

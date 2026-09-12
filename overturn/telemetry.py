@@ -1,7 +1,7 @@
 """Tracing: one span per pipeline step, and never a value from a document.
 
-OVERTURN.md §9.3 asks that patient data be masked in logs and traces. Spans here carry
-identifiers, states, counts and field names — never a field's value, a quote, or document
+Patient data is masked in logs and traces, which the project requires of itself. Spans
+here carry identifiers, states, counts and field names — never a field's value, a quote, or document
 text — so a trace can be shared with whoever runs the infrastructure without sharing a
 member's file.
 

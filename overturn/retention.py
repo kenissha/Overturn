@@ -1,7 +1,7 @@
 """How long a finished file is kept.
 
-Case files hold health information. Overturn keeps them only as long as they are useful
-(OVERTURN.md §9.3): a file is removed once it is finished — overturned, upheld and not
+Case files hold health information. Overturn keeps them only as long as they are useful:
+a file is removed once it is finished — overturned, upheld and not
 taken further, or closed — and has not changed for the retention period. An open file is
 never purged, however old it is. Removal takes everything: the case, its document text
 and its write audit.

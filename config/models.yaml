@@ -9,7 +9,7 @@
 #   OVERTURN_MODEL_ID_<ROLE>           e.g. OVERTURN_MODEL_ID_EXTRACTION
 #   AWS_REGION                         Bedrock region
 #
-# Every role defaults to Claude Opus 5. OVERTURN.md §10 sketches a cheaper tier for
+# Every role defaults to Claude Opus 5. The planning notes sketch a cheaper tier for
 # extraction; that is a cost decision to make against measured eval results, and it is one
 # line here (claude-sonnet-5 / anthropic.claude-sonnet-5) when it is made.
 #

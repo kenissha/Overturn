@@ -1,13 +1,13 @@
 # Where the build departs from the plan
 
-`OVERTURN.md` is the planning document this project started from. Most of it was built as
-written: the advocate as primary user (D-01), the model deciding nothing (D-05), no fact
-without a source (D-06), trust zones enforced by capability rather than by prompt (D-07),
-nothing sent on anyone's behalf (D-08), no legal advice (D-09), rule packs as data (D-10),
-MIT (D-11).
+This project started from a planning document, written before any code and kept out of
+the repository. Most of it was built as written: the advocate as primary user (D-01), the
+model deciding nothing (D-05), no fact without a source (D-06), trust zones enforced by
+capability rather than by prompt (D-07), nothing sent on anyone's behalf (D-08), no legal
+advice (D-09), rule packs as data (D-10), MIT (D-11).
 
-Where the build differs, the reason is recorded here, so a reader comparing the plan with
-the code finds an explanation rather than a gap.
+Where the build differs, the reason is recorded here. The decisions the plan numbered
+D-01 to D-11 are quoted by number so this page stands on its own.
 
 ## Agents
 

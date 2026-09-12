@@ -6,7 +6,7 @@ tools permit. Whether a given model can be persuaded is a separate, model-level 
 measured against the live agent once credentials are available — and a persuaded model
 still meets everything below.
 
-Vector categories follow OVERTURN.md section 9.2. docs/security-model.md maps each one to
+Vector categories follow the project's red-team plan. docs/security-model.md maps each one to
 the tests here.
 """
 

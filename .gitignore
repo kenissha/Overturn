@@ -29,3 +29,6 @@ corpus/samples/*.pdf
 # OS
 .DS_Store
 Thumbs.db
+
+# The planning document: strategy notes, kept locally and out of the repository
+OVERTURN.md
