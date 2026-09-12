@@ -91,7 +91,7 @@ switched, including to a local model, without code changes.
 Three layers, with a single source of truth between them.
 
 ```
-LAYER A — Grounded extraction        (model, untrusted zone)
+LAYER A — Grounded extraction        (Strands agent, untrusted zone)
 Reads one document. Holds two tools: record a fact with a verified quote,
 or record that the document does not say.
         |
@@ -103,6 +103,22 @@ the escalation gate, and the argument the appeal is entitled to make.
         |
 THE ADVOCATE
 Answers what only a person can answer. Confirms what matters. Files.
+```
+
+### The agent, and what it is allowed to hold
+
+The extraction agent is a [Strands Agents](https://strandsagents.com) `Agent`: a Claude
+model on Amazon Bedrock, a system prompt, and a tool list of exactly two entries. Strands
+also carries the model layer — `BedrockModel`, `AnthropicModel` and `OllamaModel` are
+selected per role from [config/models.yaml](config/models.yaml), so the provider is a
+configuration change — and the tracing, through `StrandsTelemetry`.
+
+A fresh agent is built for every document, with no shared conversation, and the document
+id is bound when its tools are constructed. The tool list is the security boundary rather
+than a paragraph of instructions, and a test pins it:
+
+```python
+assert public == {"write_fact", "write_fact_by_quote", "mark_missing"}
 ```
 
 ### Provenance is structural, not prompted
