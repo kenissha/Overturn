@@ -39,6 +39,51 @@ def _model_backed(mode: str):
     return extractor_from_env({**os.environ, "OVERTURN_EXTRACTOR": mode})
 
 
+_CREDENTIAL_HINTS: tuple[tuple[str, str], ...] = (
+    (
+        "NoCredentialsError",
+        "No AWS credentials were found. Set them in ~/.aws/credentials, or export "
+        "AWS_BEARER_TOKEN_BEDROCK with a Bedrock API key.",
+    ),
+    (
+        "UnrecognizedClientException",
+        "AWS rejected the credentials. Check the access key or Bedrock API key, and that "
+        "it belongs to the account you granted model access in.",
+    ),
+    (
+        "AccessDeniedException",
+        "AWS accepted the credentials but refused the call. A new account is verified "
+        "before it may invoke models, and Anthropic models need the use-case form "
+        "submitted once in the Bedrock console.",
+    ),
+    (
+        "ResourceNotFoundException",
+        "That model id does not exist in this region. Copy the id the Bedrock console "
+        "shows and set OVERTURN_MODEL_ID_EXTRACTION, or change the region.",
+    ),
+    (
+        "ValidationException",
+        "Bedrock rejected the request shape. If the console shows an inference-profile id "
+        "(one starting with a region, such as us.anthropic.*), set "
+        "OVERTURN_MODEL_ID_EXTRACTION to it.",
+    ),
+    (
+        "ThrottlingException",
+        "Bedrock is throttling this account. Wait, or run fewer letters with --limit.",
+    ),
+)
+
+
+def _credentials_hint(exc: BaseException) -> str | None:
+    """A short, actionable line for the failures a first run actually hits."""
+    text = f"{type(exc).__name__}: {exc}"
+    for marker, hint in _CREDENTIAL_HINTS:
+        if marker in text:
+            first = text.splitlines()[0][:300]
+            return f"Nothing was scored. {hint}{chr(10)}{chr(10)}  {first}"
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m overturn.eval")
     parser.add_argument(
@@ -64,7 +109,14 @@ def main(argv: list[str] | None = None) -> int:
     else:
         extractor = _model_backed(args.extractor)
 
-    report = run_eval(corpus, extractor, registry, name=args.extractor)
+    try:
+        report = run_eval(corpus, extractor, registry, name=args.extractor)
+    except Exception as exc:  # noqa: BLE001 - re-raised unless it is a known setup failure
+        hint = _credentials_hint(exc)
+        if hint is None:
+            raise
+        print(hint, file=sys.stderr)
+        return 2
     print(report.to_markdown())
 
     if args.failures:
